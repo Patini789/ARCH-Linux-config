@@ -1,0 +1,12 @@
+# Archivos temporales / de sistema que no deben ir al repo
+*.mp4
+*.mkv
+*.avi
+*.log
+*.tmp
+*.swp
+*.bak
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

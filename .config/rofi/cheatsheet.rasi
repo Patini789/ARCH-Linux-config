@@ -1,0 +1,85 @@
+configuration {
+    show-icons: false;
+    font: "DejaVu Sans Mono Bold 12";
+}
+
+@theme "/dev/null"
+
+* {
+    /* Fondo oscuro sólido de máximo contraste */
+    bg: #11111b;
+    bg-alt: #1e1e2e;
+    bg-selected: #313244;
+    
+    /* Texto blanco puro y de alto brillo */
+    fg: #ffffff;
+    fg-dim: #bac2de;
+    accent: #019cfb;
+    border-color: #019cfb;
+    
+    background-color: transparent;
+    text-color: @fg;
+    margin: 0;
+    padding: 0;
+}
+
+window {
+    background-color: @bg;
+    border: 3px;
+    border-color: @border-color;
+    border-radius: 16px;
+    width: 960px;
+    location: center;
+    anchor: center;
+    padding: 26px;
+}
+
+inputbar {
+    background-color: @bg-alt;
+    border: 1px;
+    border-color: @accent;
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin: 0 0 18px 0;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    text-color: @accent;
+    margin: 0 14px 0 0;
+    font: "DejaVu Sans Mono Bold 13";
+}
+
+entry {
+    placeholder: "Escribe para filtrar (ej: fondo, terminal, captura)...";
+    placeholder-color: @fg-dim;
+    text-color: #ffffff;
+    font: "DejaVu Sans Mono 12";
+}
+
+listview {
+    lines: 13;
+    columns: 1;
+    fixed-height: false;
+    scrollbar: false;
+    spacing: 6px;
+}
+
+element {
+    padding: 10px 16px;
+    border-radius: 8px;
+    background-color: transparent;
+}
+
+element selected {
+    background-color: @bg-selected;
+    text-color: @accent;
+    border: 1px;
+    border-color: @accent;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+    font: "DejaVu Sans Mono Bold 11.5";
+}

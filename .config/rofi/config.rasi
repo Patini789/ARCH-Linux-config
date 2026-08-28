@@ -1,0 +1,94 @@
+configuration {
+    modi: "drun,window,run";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    display-drun: "󰍉 ";
+    display-window: "🪟 ";
+    display-run: "⚡ ";
+    drun-display-format: "{name}";
+    font: "Inter 12";
+}
+
+@theme "/dev/null"
+
+* {
+    bg: rgba(20, 33, 45, 0.90);
+    bg-alt: rgba(255, 255, 255, 0.07);
+    fg: #e2e8f0;
+    fg-dim: #94a3b8;
+    accent: #019cfb;
+    border-color: #019cfb;
+    
+    background-color: transparent;
+    text-color: @fg;
+    margin: 0;
+    padding: 0;
+}
+
+window {
+    background-color: @bg;
+    border: 2px;
+    border-color: @border-color;
+    border-radius: 18px;
+    width: 660px;
+    location: center;
+    anchor: center;
+    padding: 24px;
+}
+
+inputbar {
+    background-color: @bg-alt;
+    border: 1px;
+    border-color: rgba(1, 156, 251, 0.40);
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin: 0 0 16px 0;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    text-color: @accent;
+    margin: 0 10px 0 0;
+    font: "Inter Bold 13";
+}
+
+entry {
+    placeholder: "Buscar aplicaciones...";
+    placeholder-color: @fg-dim;
+    text-color: #ffffff;
+    font: "Inter 12";
+}
+
+listview {
+    lines: 7;
+    columns: 1;
+    fixed-height: true;
+    scrollbar: false;
+    spacing: 6px;
+    cycle: true;
+}
+
+element {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px;
+    border-color: transparent;
+}
+
+element selected {
+    background-color: rgba(1, 156, 251, 0.22);
+    border: 1px;
+    border-color: @accent;
+    text-color: #ffffff;
+}
+
+element-icon {
+    size: 34px;
+    margin: 0 14px 0 4px;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+    font: "Inter SemiBold 12";
+}

@@ -1,0 +1,31 @@
+set default-bg                  "#1E1E2E"
+set default-fg                  "#CDD6F4"
+
+set statusbar-fg                "#CDD6F4"
+set statusbar-bg                "#313244"
+
+set inputbar-bg                 "#1E1E2E"
+set inputbar-fg                 "#CDD6F4"
+
+set notification-error-bg       "#F38BA8"
+set notification-error-fg       "#1E1E2E"
+
+set notification-warning-bg     "#F9E2AF"
+set notification-warning-fg     "#1E1E2E"
+
+set highlight-color             "#F9E2AF"
+set highlight-active-color      "#89B4FA"
+
+set completion-bg               "#313244"
+set completion-fg               "#CDD6F4"
+
+set completion-highlight-fg     "#1E1E2E"
+set completion-highlight-bg     "#89B4FA"
+
+set recolor-lightcolor          "#1E1E2E"
+set recolor-darkcolor           "#CDD6F4"
+
+set recolor                     "true"
+set recolor-keephue             "true"
+set selection-clipboard         "clipboard"
+set window-title-basename       "true"
