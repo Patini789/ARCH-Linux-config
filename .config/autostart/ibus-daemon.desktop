@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=IBus Daemon
+Comment=Servicio de entrada y corrección de texto
+Exec=/usr/bin/ibus-daemon -drxR
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

@@ -17,7 +17,8 @@ sudo pacman -S --needed --noconfirm \
     openrgb python-pillow ttf-dejavu \
     xdotool xorg-xprop xorg-xrandr nvidia-settings nvidia-utils \
     fastfetch pipewire-pulse gnome-screenshot copyq gnome-system-monitor \
-    ttf-jetbrains-mono-nerd ttf-firacode-nerd inter-font
+    ttf-jetbrains-mono-nerd ttf-firacode-nerd inter-font \
+    ibus ibus-typing-booster hunspell hunspell-es_es
 
 # Paquetes de AUR (requieren paru/yay). Se instalan si el helper existe.
 aur_install() {

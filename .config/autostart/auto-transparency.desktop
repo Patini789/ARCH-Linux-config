@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Automatic Window Transparency
+Comment=Aplicar transparencia a ventanas X11
+Exec=sh -c "exec /usr/bin/python3 \"$HOME/.local/bin/auto-transparency.py\""
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

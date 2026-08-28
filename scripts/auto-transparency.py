@@ -23,11 +23,13 @@ def session_env():
 
 env = session_env()
 
-OPACITY_BRAVE = "4252017622" # 99% Opacidad (Brave)
-OPACITY_APPS  = "4166118276" # 97% Opacidad (Antigravity, Nemo)
-OPACITY_TERM  = "3865470565" # 90% Opacidad (Kitty, Terminales)
+OPACITY_BRAVE = "4080218930" # 95% Opacidad (Brave)
+OPACITY_APPS  = "4037269257" # 94% Opacidad (Antigravity, Discord, Nemo)
+OPACITY_FULLSCREEN = "4080218930" # 95% Opacidad en pantalla completa
+OPACITY_VIDEO_FULLSCREEN = "4294967295" # 100% para vídeos a pantalla completa
 
 TERMINAL_CLASSES = ['kitty', 'gnome-terminal', 'org.gnome.terminal', 'x-terminal-emulator']
+VIDEO_CLASSES = ['brave', 'firefox', 'chromium', 'librewolf', 'discord', 'vlc', 'mpv', 'celluloid']
 # Verificar solo las propiedades que realmente interesan; evita relanzar xprop
 # para ventanas ya conocidas y sin cambios.
 _last_state = {}
@@ -58,25 +60,23 @@ def sync():
             if 'nemo-desktop' in info or 'cinnamon' in info or 'conky' in info:
                 continue
 
+            # Solo F11/video: maximizar no debe contar como pantalla completa.
             is_fullscreen = '_net_wm_state_fullscreen' in info
 
-            if not is_fullscreen:
-                geo_p = subprocess.run(['xdotool', 'getwindowgeometry', wid],
-                                       capture_output=True, text=True, env=env)
-                geo = geo_p.stdout
-                if ('1920x1080' in geo or '1824x1026' in geo) and ('0,0' in geo or '1920,0' in geo):
-                    is_fullscreen = True
-
             if is_fullscreen:
-                if _last_state.get(wid) != 'fs':
-                    subprocess.run(['xprop', '-id', wid, '-remove', '_NET_WM_WINDOW_OPACITY'],
-                                   capture_output=True, env=env)
-                    _last_state[wid] = 'fs'
+                target = OPACITY_VIDEO_FULLSCREEN if any(app in info for app in VIDEO_CLASSES) else OPACITY_FULLSCREEN
+                if _last_state.get(wid) != target:
+                    apply_opacity(wid, target)
+                    _last_state[wid] = target
             else:
                 if 'brave' in info:
                     target = OPACITY_BRAVE
                 elif any(term in info for term in TERMINAL_CLASSES):
-                    target = OPACITY_TERM
+                    if _last_state.get(wid) != 'terminal':
+                        subprocess.run(['xprop', '-id', wid, '-remove', '_NET_WM_WINDOW_OPACITY'],
+                                       capture_output=True, env=env)
+                        _last_state[wid] = 'terminal'
+                    continue
                 else:
                     target = OPACITY_APPS
                 if _last_state.get(wid) != target:

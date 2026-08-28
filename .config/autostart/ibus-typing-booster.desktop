@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=IBus Typing Booster
+Comment=Activar corrección y predicción de texto al iniciar sesión
+Exec=sh -c "sleep 2; /usr/bin/ibus engine typing-booster"
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
