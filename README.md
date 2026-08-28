@@ -38,3 +38,5 @@ cd ~/dotfiles
 ![Tema Gardevoir azul](screenshots/gardevoir-blue.png)
 
 ![Tema Gardevoir brillante](screenshots/gardevoir-shiny.png)
+
+![Sprites Pokémon en terminal](screenshots/gardevoir-terminal-sprites.png)
