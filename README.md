@@ -28,3 +28,13 @@ cd ~/dotfiles
 > - Theme de web-greeter `gardevoir-shiny` en `/usr/share/web-greeter/themes`
 > - Sonidos de Pokémon en `~/.local/share/sounds/pokemon/*.ogg | *.wav`
 > - Theme de iconos `Papirus-Dark`
+
+## Capturas
+
+![Tema Gardevoir oscuro](screenshots/gardevoir-dark.png)
+
+![Tema Gardevoir gris](screenshots/gardevoir-gray.png)
+
+![Tema Gardevoir azul](screenshots/gardevoir-blue.png)
+
+![Tema Gardevoir brillante](screenshots/gardevoir-shiny.png)
