@@ -1,0 +1,7 @@
+[theme]
+name = "gardevoir-shiny"
+description = "Gardevoir Shiny Glassmorphism Animated WebGreeter Theme"
+version = "1.0.0"
+author = "Antigravity"
+primary_html = "index.html"
+secondary_html = "secondary.html"

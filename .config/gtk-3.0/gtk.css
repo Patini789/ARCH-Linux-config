@@ -1,0 +1,145 @@
+/* Gardevoir Shiny lock screen: scoped to Cinnamon Screensaver only. */
+.csstage {
+    color: #f8fbff;
+    font-family: Inter, sans-serif;
+}
+
+.csstage .unlockbox {
+    color: #f8fbff;
+    font-size: 15px;
+    padding: 28px 34px 26px;
+    border: 1px solid rgba(145, 224, 255, 0.24);
+    border-radius: 26px;
+    background-color: rgba(11, 18, 30, 0.78);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.72), 0 0 38px rgba(43, 161, 223, 0.18);
+}
+
+.csstage .clock {
+    color: #f8fbff;
+    font-family: Inter, sans-serif;
+    text-shadow: 0 0 28px rgba(114, 221, 255, 0.42), 0 4px 18px rgba(0, 0, 0, 0.8);
+}
+
+.csstage .unlockbox label {
+    color: #dcefff;
+}
+
+.csstage .toppanel {
+    color: #dcefff;
+    border: 1px solid rgba(145, 224, 255, 0.22);
+    border-radius: 0 0 14px 14px;
+    background-color: rgba(11, 18, 30, 0.76);
+    background-image: none;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.csstage .audiopanel {
+    border-width: 0 1px 1px 0;
+    border-radius: 0 0 14px 0;
+}
+
+.csstage .infopanel {
+    border-width: 0 0 1px 1px;
+    border-radius: 0 0 0 14px;
+}
+
+.csstage .notificationwidget,
+.csstage .powerwidget {
+    color: #dcefff;
+    background-color: transparent;
+    background-image: none;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    padding: 8px;
+}
+
+.csstage .framedimage {
+    border: 3px solid #72ddff;
+    border-radius: 50%;
+    background-color: rgba(11, 18, 30, 0.78);
+    box-shadow: 0 0 24px rgba(114, 221, 255, 0.35);
+}
+
+.csstage .passwordentry {
+    min-height: 42px;
+    padding: 5px 10px;
+    color: #f8fbff;
+    border: 1px solid rgba(181, 225, 244, 0.22);
+    border-radius: 14px;
+    background-color: rgba(8, 12, 19, 0.82);
+    background-image: none;
+    box-shadow: none;
+}
+
+.csstage .passwordentry progress {
+    margin: 2px;
+    border-width: 0 0 2px;
+    border-color: rgba(114, 221, 255, 0.8);
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.csstage .passwordentry image,
+.csstage .transparentbutton image {
+    color: rgba(220, 239, 255, 0.82);
+}
+
+.csstage .transparentbutton {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 5px;
+    color: rgba(220, 239, 255, 0.82);
+    border: 1px solid rgba(181, 225, 244, 0.2);
+    border-radius: 12px;
+    background-color: rgba(10, 17, 28, 0.72);
+    background-image: none;
+    box-shadow: none;
+}
+
+.csstage .passwordentry:focus,
+.csstage .transparentbutton:focus,
+.csstage .passwordentry:hover,
+.csstage .transparentbutton:hover {
+    border-color: #72ddff;
+    background-color: rgba(24, 41, 58, 0.86);
+    box-shadow: 0 0 16px rgba(114, 221, 255, 0.22);
+}
+
+.csstage .auth-message {
+    color: #ff6fae;
+    font-weight: bold;
+}
+
+.csstage .caps-message {
+    color: #ffcf70;
+    font-weight: bold;
+}
+
+.csstage .volumeslider {
+    min-height: 24px;
+    min-width: 100px;
+    padding: 3px 0;
+    color: #72ddff;
+    border-radius: 8px;
+    background-color: rgba(114, 221, 255, 0.16);
+}
+
+.csstage scale.volumeslider slider {
+    min-height: 24px;
+    min-width: 6px;
+    margin: -9px;
+    border-radius: 8px;
+    background-color: #72ddff;
+}
+
+.csstage .trackname,
+.csstage .albumartist {
+    color: #dcefff;
+    font-family: Inter, sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    background-color: transparent;
+    background-image: none;
+}
+
+.csstage .albumartist {
+    color: rgba(220, 239, 255, 0.68);
+}

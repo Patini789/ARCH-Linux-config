@@ -1,0 +1,18 @@
+# Configuración optimizada de rendimiento para Yazi
+
+[manager]
+ratio          = [ 1, 4, 3 ]
+sort_by        = "alphabetical"
+sort_sensitive = false
+sort_reverse   = false
+sort_dir_first = true
+linemode       = "size"
+show_hidden    = false
+show_symlink   = true
+
+[preview]
+tab_size        = 2
+max_width       = 1000
+max_height      = 1000
+image_delay     = 30
+image_quality   = 75

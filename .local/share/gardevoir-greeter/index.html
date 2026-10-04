@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gardevoir Shiny Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="bg-layer"></div>
+    <div id="overlay-layer"></div>
+    <canvas id="particles-canvas"></canvas>
+
+    <header class="top-bar">
+        <div class="time-kicker">GARDEVOIR // SHINY NODE</div>
+        <div id="clock">00:00</div>
+        <div id="date">Viernes, 28 de Agosto</div>
+        <div class="status-line"><span class="status-dot"></span> Sistema listo para iniciar sesión</div>
+    </header>
+
+    <div class="corner-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="main-container">
+        <div class="glass-card" id="login-card">
+            <div class="card-kicker"><span></span> ACCESO PERSONAL <span></span></div>
+            <div class="avatar-container">
+                <div class="avatar-glow"></div>
+                <img id="user-avatar" src="avatar.png" alt="User Avatar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><circle cx=\'50\' cy=\'50\' r=\'46\' fill=\'%23161b26\' stroke=\'%232ba1df\' stroke-width=\'4\'/><circle cx=\'50\' cy=\'38\' r=\'18\' fill=\'%232ba1df\'/><path d=\'M22 82 C22 60 78 60 78 82 Z\' fill=\'%232ba1df\'/></svg>'">
+            </div>
+
+            <h1 id="user-name">Patini</h1>
+            <p id="system-status">Gardevoir Psychic Node <span class="status-separator">/</span> Arch Linux</p>
+
+            <form id="login-form" onsubmit="event.preventDefault(); submitPassword();">
+                <label class="field-label" for="password-input">Contraseña</label>
+                <div class="input-group">
+                    <img class="input-icon" src="icon-lujoball.png" alt="" aria-hidden="true">
+                    <input type="password" id="password-input" placeholder="Introduce tu contraseña" autofocus autocomplete="off">
+                    <button type="submit" id="submit-btn" aria-label="Ingresar">
+                        <img src="icon-superball.png" alt="">
+                    </button>
+                </div>
+                <div class="form-hint"><span class="hint-line"></span> Pulsa Enter para continuar <span class="hint-line"></span></div>
+            </form>
+
+            <div id="message-area"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-bar" aria-label="Acciones del sistema">
+        <button class="power-btn" onclick="handlePower('suspend')" title="Suspender">
+            <img class="btn-icon" src="icon-snorlax.png" alt="">
+            <span class="btn-text">Suspender</span>
+        </button>
+        <button class="power-btn" onclick="handlePower('restart')" title="Reiniciar">
+            <img class="btn-icon" src="icon-superball.png" alt="">
+            <span class="btn-text">Reiniciar</span>
+        </button>
+        <button class="power-btn danger" onclick="handlePower('shutdown')" title="Apagar">
+            <img class="btn-icon" src="icon-masterball.png" alt="">
+            <span class="btn-text">Apagar</span>
+        </button>
+    </nav>
+
+    <script src="particles.js"></script>
+    <script src="greeter.js"></script>
+</body>
+</html>

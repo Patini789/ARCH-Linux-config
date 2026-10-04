@@ -1,0 +1,83 @@
+# Starship Prompt - Gardevoir Aesthetic Theme
+add_newline = true
+
+format = """
+$os\
+$directory\
+$git_branch\
+$git_status\
+$package\
+$nodejs\
+$python\
+$rust\
+$cmd_duration\
+$line_break\
+$character"""
+
+[os]
+disabled = false
+format = "[$symbol ]($style)"
+style = "bold #89dceb"
+
+[os.symbols]
+Arch = "󰣇"
+Ubuntu = ""
+Linux = "󰌽"
+
+[directory]
+format = "[$path]($style)[$read_only]($read_only_style) "
+style = "bold #b4befe"
+read_only = " 󰌾"
+read_only_style = "bold #f38ba8"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+format = "[$symbol$branch]($style) "
+symbol = " "
+style = "bold #94e2d5"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style) )"
+style = "bold #f38ba8"
+conflicted = "󰞇 "
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕⇡${ahead_count}⇣${behind_count} "
+untracked = "? "
+stashed = "📦 "
+modified = "! "
+staged = "+ "
+renamed = "» "
+deleted = "✘ "
+
+[nodejs]
+format = "[$symbol($version )]($style)"
+symbol = "󰎙 "
+style = "bold #a6e3a1"
+
+[python]
+format = "[$symbol($version )]($style)"
+symbol = "󰌠 "
+style = "bold #f9e2af"
+
+[rust]
+format = "[$symbol($version )]($style)"
+symbol = "󱘗 "
+style = "bold #fab387"
+
+[package]
+format = "[$symbol$version]($style) "
+symbol = "󰏗 "
+style = "bold #cdd6f4"
+
+[cmd_duration]
+min_time = 2_000
+format = "[$symbol$duration]($style) "
+# symbol
+style = "bold #f9e2af"
+
+[character]
+success_symbol = "[❯](bold #89dceb)"
+error_symbol = "[❯](bold #f38ba8)"
+vicmd_symbol = "[❮](bold #a6e3a1)"
