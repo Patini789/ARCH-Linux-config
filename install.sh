@@ -37,10 +37,11 @@ echo "📦 1b. Instalando paquetes de AUR (opcional)..."
 aur_install pokemon-colorscripts
 
 echo "📁 2. Copiando configuraciones y temas de usuario..."
-mkdir -p ~/.config ~/.themes ~/.local/bin ~/Pictures/Gardevoir/Wallpapers
+mkdir -p ~/.config ~/.themes ~/.icons ~/.local/bin ~/Pictures/Gardevoir/Wallpapers
 
 cp -r "$DOTFILES_DIR/.config/"* ~/.config/
 cp -r "$DOTFILES_DIR/.themes/"* ~/.themes/
+cp -a "$DOTFILES_DIR/.icons/"* ~/.icons/
 cp -r "$DOTFILES_DIR/scripts/"* ~/.local/bin/
 chmod +x ~/.local/bin/*
 cp -r "$DOTFILES_DIR/wallpapers/"* ~/Pictures/Gardevoir/Wallpapers/
@@ -54,8 +55,9 @@ fi
 systemctl --user daemon-reload 2>/dev/null || true
 systemctl --user enable altcode-daemon.service 2>/dev/null || true
 
-echo "🖼️  3. Aplicando configuraciones de sistema (lightdm, display, fondo 4K)..."
-sudo mkdir -p /etc/lightdm /usr/share/backgrounds/gardevoir /usr/local/bin
+echo "🖼️  3. Aplicando configuraciones de sistema (lightdm, display, fondo 4K, cursores)..."
+sudo mkdir -p /etc/lightdm /usr/share/backgrounds/gardevoir /usr/local/bin /usr/share/icons
+sudo cp -a "$DOTFILES_DIR/.icons/Gardevoir" /usr/share/icons/ 2>/dev/null || true
 sudo cp "$DOTFILES_DIR/etc/lightdm/lightdm.conf" /etc/lightdm/lightdm.conf
 sudo cp "$DOTFILES_DIR/etc/lightdm/web-greeter.toml" /etc/lightdm/web-greeter.toml
 sudo cp "$DOTFILES_DIR/etc/lightdm/lightdm-gtk-greeter.conf" /etc/lightdm/lightdm-gtk-greeter.conf
@@ -66,6 +68,8 @@ sudo cp "$DOTFILES_DIR/wallpapers/6356688_upscayl_4x_digital-art-4x.png" /usr/sh
 echo "⌨️ 4. Configurando atajos de teclado y tema de Cinnamon..."
 xdg-mime default nemo.desktop inode/directory
 gsettings set org.cinnamon.theme name "Gardevoir-Dynamic"
+gsettings set org.cinnamon.desktop.interface cursor-theme "Gardevoir"
+gsettings set org.gnome.desktop.interface cursor-theme "Gardevoir"
 
 gsettings set org.cinnamon.desktop.keybindings custom-list "['custom0', 'custom1', 'custom2', 'custom3', 'custom4', 'custom5', 'custom6', 'custom7']"
 
