@@ -1,0 +1,14 @@
+[Unit]
+Description=Windows Alt Codes Daemon for Linux
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/altcode-daemon -f
+Restart=always
+RestartSec=3
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+
+[Install]
+WantedBy=default.target

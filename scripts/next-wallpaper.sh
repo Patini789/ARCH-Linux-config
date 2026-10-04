@@ -18,12 +18,20 @@ if [ -z "$CHOSEN" ]; then
     CHOSEN="file://${IMAGES[0]}"
 fi
 
-# Reproducir sonido de brillo Shiny en segundo plano
+# Sonido de brillo Shiny en segundo plano
 pw-play --volume=0.60 "${HOME}/.local/share/sounds/pokemon/shiny_sparkle.wav" 2>/dev/null &
 
 gsettings set org.cinnamon.desktop.background picture-options 'zoom'
 gsettings set org.cinnamon.desktop.background picture-uri "$CHOSEN"
 
-# Extraer el color más saturado y adaptar el tema de la barra y las luces RGB
+# Extraer el color más saturado y adaptar el tema (síncrono para garantizar que termine antes de salir)
 RAW_PATH="${CHOSEN#file://}"
-python3 "${HOME}/.local/bin/dynamic-theme.py" "$RAW_PATH" >/dev/null 2>&1 &
+python3 "${HOME}/.local/bin/dynamic-theme.py" "$RAW_PATH"
+
+# Reiniciar Conky y GLava con la nueva paleta de colores
+pkill -x conky 2>/dev/null
+pkill -x glava 2>/dev/null
+sleep 0.1
+nohup conky -c "${HOME}/.config/conky/gardevoir_glass.conf" >/dev/null 2>&1 &
+nohup glava --desktop >/dev/null 2>&1 &
+

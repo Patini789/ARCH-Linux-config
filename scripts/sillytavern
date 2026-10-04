@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+DIR="${HOME}/.local/share/SillyTavern"
+if [ -d "$DIR" ]; then
+    cd "$DIR"
+    exec node "$DIR/server.js" --browserLaunchEnabled true "$@"
+else
+    echo "SillyTavern no está instalado en $DIR"
+    exit 1
+fi

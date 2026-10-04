@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Exec=copyq --start-server
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[es]=Historial de Portapapeles
+Name=CopyQ
+Comment=Clipboard Manager
+Icon=copyq
+Categories=Utility;

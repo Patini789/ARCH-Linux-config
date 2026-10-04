@@ -4,13 +4,21 @@ Un entorno de trabajo completo para **Arch Linux + Cinnamon**, optimizado para d
 
 ## Características Principales
 * **Tema Dinámico Gardevoir:** La barra de tareas, bordes de Rofi y luces RGB (OpenRGB) se adaptan automáticamente a los colores de cada fondo de pantalla en 4K.
-* **Flujo 100% Teclado:**
+* **Flujo 100% Teclado y Modern CLI:**
   * `Win + Espacio` -> Rofi Spotlight
   * `Win + Tab` -> Buscador de Ventanas en Cualquier Monitor
   * `Win + X` -> Menú de Energía (Apagar/Reiniciar)
-  * `Win + /` -> Panel Flotante de Atajos
+  * `Win + /` -> Panel Flotante de Atajos y Comandos de Terminal (`eza`, `bat`, `ripgrep`, `fd`, `yazi`, etc.)
   * `Win + G` -> Siguiente Fondo de Pantalla + Sincronización RGB
   * `Win + Enter` -> Terminal Kitty con Pokémon
+* **Herramientas Modernas de Terminal (CLI):**
+  * `ls` / `ll` / `tree` -> `eza` (Iconos, colores, tamaños legibles y árbol)
+  * `cat` -> `bat` (Resaltado de sintaxis, paginación y números de línea)
+  * `rg` -> `ripgrep` (Búsqueda ultra rápida en archivos)
+  * `fd` -> Alternativa moderna e instantánea a `find`
+  * `fzf` -> Búsqueda difusa interactiva (`Ctrl+R`, `Ctrl+T`, `Alt+C`)
+  * `yazi` (`y`) -> Explorador de archivos con previsualización 4K en terminal
+  * `btop` -> Monitor interactivo de CPU, RAM, GPU NVIDIA y procesos
 * **Audio Dinámico (GLava):** Visualizador de ondas en tiempo real sobre la barra de tareas.
 * **Entorno Robótica (ROS 2 Jazzy):** Contenedor Ubuntu 24.04 con aceleración NVIDIA y RViz2.
 * **Herramientas Rápidas:** Visor `Viewnior` (sprites Godot), `Zathura` (PDFs modo oscuro) y `Yazi` (explorador 4K).

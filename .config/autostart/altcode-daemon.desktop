@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=AltCode Daemon
+Comment=Windows-style Alt Codes for Linux
+Exec=bash -c 'if [ -x "$HOME/.local/bin/altcode-daemon" ]; then "$HOME/.local/bin/altcode-daemon"; fi'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true

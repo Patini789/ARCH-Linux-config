@@ -1,85 +1,122 @@
 configuration {
-    show-icons: false;
-    font: "DejaVu Sans Mono Bold 12";
+    show-icons: true;
+    font: "JetBrainsMono Nerd Font 11.5";
 }
 
 @theme "/dev/null"
 
 * {
-    /* Fondo oscuro sólido de máximo contraste */
-    bg: #11111b;
-    bg-alt: #1e1e2e;
-    bg-selected: #313244;
-    
-    /* Texto blanco puro y de alto brillo */
-    fg: #ffffff;
-    fg-dim: #bac2de;
-    accent: #019cfb;
-    border-color: #019cfb;
-    
+    /* === DYNAMIC COLORS (reemplazados por dynamic-theme.py / show-shortcuts.sh) === */
+    bg:          #2a2a2d;
+    bg-mid:      #333337;
+    bg-alt:      #3d3d41;
+    bg-selected: #4a4a4e;
+
+    fg:          #e8eaf0;
+    fg-dim:      #888eb0;
+    fg-sep:      #4a4e70;
+
+    accent:      #e2883d;
+    accent-dim:  #65452a;
+    border-color: #e2883d;
+
     background-color: transparent;
-    text-color: @fg;
-    margin: 0;
+    text-color:       @fg;
+    margin:  0;
     padding: 0;
 }
 
 window {
     background-color: @bg;
-    border: 3px;
-    border-color: @border-color;
-    border-radius: 16px;
-    width: 960px;
-    location: center;
-    anchor: center;
-    padding: 26px;
+    border:           1px;
+    border-color:     @accent-dim;
+    border-radius:    14px;
+    width:            1040px;
+    location:         center;
+    anchor:           center;
+    padding:          20px 24px;
+}
+
+mainbox {
+    background-color: transparent;
+    spacing:          0;
+    children:         [ inputbar, message, listview ];
+}
+
+message {
+    background-color: transparent;
+    padding:          0 0 10px 0;
+}
+
+textbox {
+    background-color: transparent;
+    text-color:       @fg-sep;
+    font:             "JetBrainsMono Nerd Font 9";
 }
 
 inputbar {
     background-color: @bg-alt;
-    border: 1px;
-    border-color: @accent;
-    border-radius: 10px;
-    padding: 12px 18px;
-    margin: 0 0 18px 0;
-    children: [ prompt, entry ];
+    border:           1px;
+    border-color:     @accent;
+    border-radius:    8px;
+    padding:          10px 16px;
+    margin:           0 0 14px 0;
+    spacing:          0;
+    children:         [ prompt, entry ];
 }
 
 prompt {
     text-color: @accent;
-    margin: 0 14px 0 0;
-    font: "DejaVu Sans Mono Bold 13";
+    margin:     0 12px 0 0;
+    font:       "JetBrainsMono Nerd Font Bold 12";
 }
 
 entry {
-    placeholder: "Escribe para filtrar (ej: fondo, terminal, captura)...";
+    placeholder:       "filtrar atajo o comando...";
     placeholder-color: @fg-dim;
-    text-color: #ffffff;
-    font: "DejaVu Sans Mono 12";
+    text-color:        @fg;
+    font:              "JetBrainsMono Nerd Font 11.5";
 }
 
 listview {
-    lines: 13;
-    columns: 1;
+    lines:        16;
+    columns:      1;
     fixed-height: false;
-    scrollbar: false;
-    spacing: 6px;
+    scrollbar:    false;
+    spacing:      3px;
+    background-color: transparent;
 }
 
 element {
-    padding: 10px 16px;
-    border-radius: 8px;
+    padding:          6px 12px;
+    border-radius:    6px;
     background-color: transparent;
+    cursor:           pointer;
+    spacing:          10px;
+    children:         [ element-icon, element-text ];
+}
+
+element.normal.normal {
+    background-color: transparent;
+    text-color:       @fg;
 }
 
 element selected {
     background-color: @bg-selected;
-    text-color: @accent;
-    border: 1px;
-    border-color: @accent;
+    text-color:       @accent;
+    border:           1px;
+    border-color:     @accent-dim;
+    border-radius:    6px;
+}
+
+element-icon {
+    size:             26px;
+    vertical-align:   0.5;
+    background-color: transparent;
 }
 
 element-text {
-    vertical-align: 0.5;
-    text-color: inherit;
-    font: "DejaVu Sans Mono Bold 11.5";
+    vertical-align:   0.5;
+    text-color:       inherit;
+    font:             "JetBrainsMono Nerd Font 11";
 }

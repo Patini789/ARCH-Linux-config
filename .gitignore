@@ -9,4 +9,10 @@
 __pycache__/
 *.pyc
 .DS_Store
-Thumbs.db
+# Binarios pesados y ejecutables compilados
+scripts/lm-studio
+scripts/lms
+scripts/altcode-daemon
+scripts/altcode-daemon-fg
+*.o
+*.so

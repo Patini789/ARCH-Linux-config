@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Exec=bash -c 'if [ -x "$HOME/.local/bin/set-rgb.sh" ]; then "$HOME/.local/bin/set-rgb.sh"; fi'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=OpenRGB Gardevoir Theme
+Comment=Enciende las luces de tu teclado y ratón

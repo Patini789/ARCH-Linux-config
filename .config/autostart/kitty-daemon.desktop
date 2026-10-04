@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Kitty Daemon (Terminal Preload)
+Comment=Inicia Kitty en segundo plano al login para que las ventanas abran instantáneamente
+Exec=bash -c 'sleep 3 && DISPLAY=:0 __GL_THREADED_OPTIMIZATIONS=1 /usr/bin/kitty --start-as=hidden'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true

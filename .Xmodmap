@@ -1,0 +1,5 @@
+! Soporte de < y > para teclados físicos US ANSI en distribución latam
+keycode 52 = z Z less less
+keycode 53 = x X greater greater
+keycode 59 = comma semicolon less less
+keycode 60 = period colon greater greater

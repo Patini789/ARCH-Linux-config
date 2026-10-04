@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Fix Displays
+Comment=Ajustar 165Hz y escalado de TV sin scroll al entrar a la sesión
+Exec=bash -c 'if [ -x "$HOME/.local/bin/fix-displays.sh" ]; then "$HOME/.local/bin/fix-displays.sh" --autostart; fi'
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true

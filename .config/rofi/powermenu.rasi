@@ -1,0 +1,79 @@
+configuration {
+    show-icons: false;
+    font: "Inter Bold 13";
+}
+
+@theme "/dev/null"
+
+* {
+    bg: #0c0e14f2;
+    bg-card: #1c202c;
+    bg-selected: #3584e4;
+    fg: #ffffff;
+    fg-dim: #94a3b8;
+    accent: #3584e4;
+    border-color: #3584e4;
+    
+    background-color: transparent;
+    text-color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+window {
+    background-color: @bg;
+    border: 2px;
+    border-color: @accent;
+    border-radius: 18px;
+    width: 480px;
+    location: center;
+    anchor: center;
+    padding: 22px;
+}
+
+mainbox {
+    children: [ inputbar, listview ];
+    spacing: 14px;
+}
+
+inputbar {
+    enabled: true;
+    background-color: @bg-card;
+    border: 1px;
+    border-color: @accent;
+    border-radius: 12px;
+    padding: 12px 16px;
+    children: [ prompt ];
+}
+
+prompt {
+    text-color: @accent;
+    font: "Inter Bold 15";
+    horizontal-align: 0.5;
+}
+
+listview {
+    lines: 6;
+    columns: 1;
+    fixed-height: false;
+    scrollbar: false;
+    spacing: 8px;
+}
+
+element {
+    padding: 12px 18px;
+    border-radius: 10px;
+    background-color: @bg-card;
+    text-color: #ffffff;
+}
+
+element selected {
+    background-color: @accent;
+    text-color: #0c0e14;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: inherit;
+    font: "Inter Bold 13";
+}
