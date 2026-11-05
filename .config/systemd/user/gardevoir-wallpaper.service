@@ -1,0 +1,11 @@
+[Unit]
+Description=Gardevoir Dynamic Wallpaper Switcher
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/next-wallpaper.sh --silent
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+Environment=XDG_CURRENT_DESKTOP=X-Cinnamon
+KillMode=process

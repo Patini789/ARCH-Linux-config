@@ -3,8 +3,6 @@
 # ==============================================================================
 # PANEL DE ATAJOS Y COMANDOS DE TERMINAL (GARDEVOIR / ARCH LINUX)
 # ==============================================================================
-
-# ── Color de acento dinamico ──────────────────────────────────────────────────
 THEME_CSS="${HOME}/.themes/Gardevoir-Dynamic/cinnamon/cinnamon.css"
 ACCENT=""
 if [ -f "$THEME_CSS" ]; then
@@ -104,12 +102,17 @@ generate_items() {
     python3 - << 'PYEOF'
 import os, sys
 
-icons = os.path.expanduser("~/.local/share/icons/pokeballs")
+icon_dirs = [
+    os.path.expanduser("~/.local/share/icons/pokeballs"),
+    os.path.expanduser("~/.local/share/gardevoir-greeter"),
+]
 
 def with_icon(text, icon_name):
-    icon_path = os.path.join(icons, icon_name)
-    if os.path.exists(icon_path):
-        return f"{text}\0icon\x1f{icon_path}"
+    for d in icon_dirs:
+        for candidate in (icon_name, f"icon-{icon_name}"):
+            p = os.path.join(d, candidate)
+            if os.path.exists(p):
+                return f"{text}\0icon\x1f{p}"
     return text
 
 entries = [
@@ -124,6 +127,8 @@ entries = [
     "  [ Win + G ]               ->  Siguiente fondo 4K + sincronizar RGB",
     "  [ Win + L ]               ->  Bloquear pantalla",
     "  [ Win + Shift + S ]       ->  Captura de region al portapapeles",
+    "  [ Win + Shift + C ]       ->  Gardevoir Poké-Calc (Calculadora glass)",
+    "  [ Win + Shift + T ]       ->  Gardevoir TimeDex (Reloj / Timer / Alarmas)",
     "  [ Win + V ]               ->  Historial del portapapeles (CopyQ)",
     "  [ Win + W ]               ->  Vista mosaico de ventanas (Overview)",
     "  [ Win + S ]               ->  Vista de escritorios virtuales (Expo)",
@@ -135,6 +140,10 @@ entries = [
     "  [ Win + F ]               ->  Pantalla completa",
     "  [ Win + D ]               ->  Mostrar / ocultar escritorio",
     "  [ Win + Ctrl + Flechas ]  ->  Dividir ventana (izq / der / arriba)",
+    "  [ Win + } / \\ ]           ->  Cambiar idioma de teclado (Español / Inglés)",
+    "  [ Win + J ]               ->  Multimedia: Canción anterior",
+    "  [ Win + K ]               ->  Multimedia: Play / Pausa",
+    "  [ Win + N ]               ->  Multimedia: Siguiente canción",
     "  [ Viewnior ]              ->  Visor rapido de imagenes",
     "  [ Zathura ]               ->  Visor de PDF por teclado",
 
@@ -156,7 +165,28 @@ entries = [
     "  [ opencode ]              ->  asistente IA de programacion en terminal",
     "  [ 7z ]                    ->  comprimir y extraer archivos",
     "  [ set-rgb ]               ->  sincronizar iluminacion RGB con el tema",
-    "  [ gpu-stats ]             ->  ver uso % y VRAM de la GPU NVIDIA",
+    "  [ gpu-stats ]             ->  ver uso % y VRAM de la GPU",
+    "  [ ros2 / rviz2 ]          ->  ROS 2 Humble: consola de robotica y visor 3D",
+
+    # Titulo 3 con Superball
+    with_icon("── GIT -- CONTROL DE VERSIONES ──────────────────────────────────────", "superball.png"),
+    "  [ git status ]            ->  ver estado de archivos y cambios pendientes",
+    "  [ git add . ]             ->  preparar todos los cambios para commit",
+    "  [ git add <archivo> ]     ->  preparar un archivo especifico",
+    "  [ git commit -m ]         ->  guardar cambios con mensaje descriptivo",
+    "  [ git commit -am ]        ->  add + commit directo (archivos rastreados)",
+    "  [ git fetch ]             ->  descargar novedades del remoto sin mezclar",
+    "  [ git pull ]              ->  descargar y fusionar cambios del remoto",
+    "  [ git push ]              ->  subir commits al repositorio remoto",
+    "  [ git switch -c <rama> ]  ->  crear nueva rama y cambiar a ella",
+    "  [ git switch <rama> ]     ->  cambiar a una rama existente",
+    "  [ git branch -a ]         ->  listar ramas locales y remotas",
+    "  [ git merge <rama> ]      ->  fusionar rama seleccionada en la actual",
+    "  [ git log --oneline ]     ->  historial compacto (q para salir)",
+    "  [ git diff ]              ->  ver diferencias antes de add (q para salir)",
+    "  [ git restore <archivo> ] ->  descartar cambios no guardados en archivo",
+    "  [ git restore --staged ]  ->  quitar archivo del area de preparacion",
+    "  [ git stash / pop ]       ->  guardar temporalmente cambios / recuperar",
 ]
 
 sys.stdout.buffer.write(("\n".join(entries) + "\n").encode("utf-8"))
@@ -168,7 +198,7 @@ CHOICE=$(generate_items | rofi -dmenu -show-icons -i \
     -theme "${HOME}/.config/rofi/cheatsheet.rasi" \
     -p " ATAJOS")
 
-[[ -z "$CHOICE" || "$CHOICE" == *"SISTEMA"* || "$CHOICE" == *"TERMINAL"* ]] && exit 0
+[[ -z "$CHOICE" || "$CHOICE" == *"SISTEMA"* || "$CHOICE" == *"TERMINAL"* || "$CHOICE" == *"GIT"* ]] && exit 0
 
 case "$CHOICE" in
     *"eza"*|*"ls / ll"*)
@@ -230,7 +260,14 @@ case "$CHOICE" in
         notify-send -u normal -i preferences-desktop-theme "RGB" "Perfil sincronizado con OpenRGB"
         ;;
     *"gpu-stats"*)
-        kitty --hold -e watch -n 1 nvidia-smi &
+        if command -v nvidia-smi >/dev/null 2>&1; then
+            kitty --hold -e watch -n 1 nvidia-smi &
+        else
+            kitty --hold -e watch -n 1 ~/.local/bin/gpu-stats.sh &
+        fi
+        ;;
+    *"ros2"*|*"rviz2"*)
+        kitty --title "ROS 2 Humble (Hawksbill)" -e distrobox enter ros2-humble &
         ;;
     *"Rofi"*|*"aplicaciones"*)
         rofi -show drun &
@@ -270,5 +307,85 @@ case "$CHOICE" in
         ;;
     *"Zathura"*)
         zathura &
+        ;;
+    *"Cambiar idioma"*|*"idioma de teclado"*)
+        "${HOME}/.local/bin/toggle-keyboard-layout.sh" &
+        ;;
+    *"anterior"*)
+        "${HOME}/.local/bin/media-control.sh" previous &
+        ;;
+    *"Play / Pausa"*|*"Pausa"*)
+        "${HOME}/.local/bin/media-control.sh" play-pause &
+        ;;
+    *"Siguiente canción"*|*"Siguiente"*)
+        "${HOME}/.local/bin/media-control.sh" next &
+        ;;
+    *"git status"*)
+        echo "git status" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git status"
+        ;;
+    *"git add ."*)
+        echo "git add ." | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git add ."
+        ;;
+    *"git add <archivo>"*)
+        echo "git add " | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git add <archivo>"
+        ;;
+    *"git commit -am"*)
+        echo 'git commit -am ""' | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" 'git commit -am "mensaje"'
+        ;;
+    *"git commit -m"*)
+        echo 'git commit -m ""' | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" 'git commit -m "mensaje"'
+        ;;
+    *"git fetch"*)
+        echo "git fetch" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git fetch"
+        ;;
+    *"git pull"*)
+        echo "git pull" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git pull"
+        ;;
+    *"git push"*)
+        echo "git push" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git push"
+        ;;
+    *"git switch -c"*)
+        echo "git switch -c " | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git switch -c <nueva-rama>"
+        ;;
+    *"git switch <rama>"*)
+        echo "git switch " | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git switch <rama>"
+        ;;
+    *"git branch"*)
+        echo "git branch -a" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git branch -a"
+        ;;
+    *"git merge"*)
+        echo "git merge " | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git merge <rama>"
+        ;;
+    *"git log"*)
+        echo "git log --oneline --graph --all" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git log --oneline --graph --all"
+        ;;
+    *"git diff"*)
+        echo "git diff" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git diff"
+        ;;
+    *"git restore <archivo>"*)
+        echo "git restore " | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git restore <archivo>"
+        ;;
+    *"git restore --staged"*)
+        echo "git restore --staged " | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git restore --staged <archivo>"
+        ;;
+    *"git stash"*)
+        echo "git stash" | xclip -selection clipboard
+        notify-send -u normal -i utilities-terminal "Git Copiado" "git stash  |  git stash pop"
         ;;
 esac

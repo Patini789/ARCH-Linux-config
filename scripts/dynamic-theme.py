@@ -102,6 +102,7 @@ def update_system_theme(dom_rgb, accent_rgb):
     selected-color: #11111b;
     border: 1px solid rgba({ar}, {ag}, {ab}, 0.6);
 }}
+"""
     home = os.path.expanduser("~")
     theme_css_path = os.path.join(home, ".themes/Gardevoir-Dynamic/cinnamon/cinnamon.css")
     if os.path.exists(theme_css_path):
@@ -165,9 +166,49 @@ def update_system_theme(dom_rgb, accent_rgb):
         with open(cheatsheet_rasi, "w") as f:
             f.write(c)
 
-    # 5. OpenRGB
-    subprocess.run(["openrgb", "--device", "1", "--mode", "Direct", "--color", accent_hex[1:]], capture_output=True)
-    subprocess.run(["openrgb", "--device", "0", "--mode", "Static", "--color", accent_hex[1:]], capture_output=True)
+    # 5. OpenRGB (opcional, solo si está instalado en el sistema)
+    import shutil
+    if shutil.which("openrgb"):
+        subprocess.run(["openrgb", "--device", "1", "--mode", "Direct", "--color", accent_hex[1:]], capture_output=True)
+        subprocess.run(["openrgb", "--device", "0", "--mode", "Static", "--color", accent_hex[1:]], capture_output=True)
+
+    # 6. Gardevoir Poké-Calc theme
+    calc_cfg_dir = os.path.join(home, ".config/gardevoir-calc")
+    if os.path.exists(calc_cfg_dir):
+        calc_theme_json = os.path.join(calc_cfg_dir, "theme.json")
+        try:
+            import json
+            theme_dict = {
+                "dom_hex": dom_hex,
+                "accent_hex": accent_hex,
+                "accent_dim_hex": accent_dim_hex,
+                "horn_pink": "#FF4370",
+                "text_white": "#FFFFFF",
+                "text_muted": "#CBD5E1"
+            }
+            with open(calc_theme_json, "w") as f:
+                json.dump(theme_dict, f, indent=2)
+        except Exception as e:
+            print(f"Error actualizando tema de calculadora: {e}")
+
+    # 7. Gardevoir TimeDex theme
+    timedex_cfg_dir = os.path.join(home, ".config/gardevoir-timedex")
+    if os.path.exists(timedex_cfg_dir):
+        timedex_theme_json = os.path.join(timedex_cfg_dir, "theme.json")
+        try:
+            import json
+            theme_dict = {
+                "dom_hex": dom_hex,
+                "accent_hex": accent_hex,
+                "accent_dim_hex": accent_dim_hex,
+                "horn_pink": "#FF4370",
+                "text_white": "#FFFFFF",
+                "text_muted": "#CBD5E1"
+            }
+            with open(timedex_theme_json, "w") as f:
+                json.dump(theme_dict, f, indent=2)
+        except Exception as e:
+            print(f"Error actualizando tema de TimeDex: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

@@ -17,19 +17,16 @@ rm -f "$TMP_IMG"
 gnome-screenshot -a -f "$TMP_IMG"
 
 if [ -s "$TMP_IMG" ]; then
-    # 1. Enviar directamente al gestor de portapapeles CopyQ para pegado instantáneo
+    # 1. Guardar en el historial de CopyQ (Win+V) y activar en el portapapeles (Ctrl+V)
     if command -v copyq >/dev/null 2>&1; then
-        copyq copy image/png - < "$TMP_IMG" 2>/dev/null
-    fi
-
-    # 2. Respaldo nativo en X11 clipboard
-    if command -v xclip >/dev/null 2>&1; then
+        copyq write image/png - < "$TMP_IMG" 2>/dev/null && copyq select 0 2>/dev/null
+    # 2. Respaldo nativo en X11 clipboard si no está CopyQ
+    elif command -v xclip >/dev/null 2>&1; then
         xclip -selection clipboard -t image/png -i "$TMP_IMG" 2>/dev/null
     fi
 
-    # 3. Confirmación auditiva y notificación
+    # 3. Confirmación auditiva (sin notificación emergente)
     pw-play /usr/share/sounds/freedesktop/stereo/screen-capture.oga 2>/dev/null &
-    notify-send -u low -i camera-photo "📸 Captura Copiada" "Área copiada al portapapeles. Pega con Ctrl+V"
 fi
 
 

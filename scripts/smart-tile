@@ -1,0 +1,581 @@
+#!/usr/bin/env python3
+"""
+Smart Tile for Cinnamon (Muffin / X11)
+Gestión inteligente de ventanas con Super + Flechas:
+- Horizontal:
+    * Izquierda <-> Centro <-> Derecha
+    * Pulsar la misma tecla cicla anchos: 50% (mitad) -> 33.3% (tercio) -> 66.7% (dos tercios)
+    * ¡Vista central completa! (3 ventanas de 33% en Izquierda, Centro y Derecha)
+- Vertical:
+    * Arriba: Mitad superior (100% ancho, 50% alto). Si ya está arriba -> Maximizar
+    * Abajo: Mitad inferior (100% ancho, 50% alto). Si está maximizada -> Desmaximizar
+    * Minimizar seguro: Requiere un clic adicional al estar en la posición baja para evitar minimizados accidentales
+- Combinado (Cuadrantes):
+    * En cualquier columna (izq, centro, der), Arriba/Abajo posiciona en cuadrante superior/inferior
+"""
+
+import sys
+import os
+import re
+import json
+import time
+import subprocess
+import ctypes
+from ctypes import c_int, c_long, c_ulong, c_char_p, c_void_p, Structure, Union, POINTER, byref
+
+# Ratios de ancho al ciclar (50% -> 33.3% -> 66.7%)
+RATIOS = [0.50, 1.0 / 3.0, 2.0 / 3.0]
+STATE_FILE = os.path.expanduser("~/.cache/smart-tile-state.json")
+CYCLE_TIMEOUT = 2.5  # Segundos para considerar pulsaciones consecutivas
+DEBOUNCE_TIME = 0.12  # Ignorar rebotes de tecla físicos < 120ms
+
+# --- X11 CTypes Setup ---
+X11 = ctypes.cdll.LoadLibrary('libX11.so.6')
+
+Display_p = c_void_p
+X11.XOpenDisplay.restype = Display_p
+X11.XOpenDisplay.argtypes = [c_char_p]
+X11.XDefaultRootWindow.restype = c_ulong
+X11.XDefaultRootWindow.argtypes = [Display_p]
+X11.XCloseDisplay.argtypes = [Display_p]
+X11.XInternAtom.restype = c_ulong
+X11.XInternAtom.argtypes = [Display_p, c_char_p, c_int]
+X11.XFree.restype = c_int
+X11.XFree.argtypes = [c_void_p]
+X11.XFlush.argtypes = [Display_p]
+X11.XSync.argtypes = [Display_p, c_int]
+
+X11.XGetWindowProperty.restype = c_int
+X11.XGetWindowProperty.argtypes = [
+    Display_p, c_ulong, c_ulong, c_long, c_long, c_int, c_ulong,
+    POINTER(c_ulong), POINTER(c_int), POINTER(c_ulong), POINTER(c_ulong),
+    POINTER(POINTER(ctypes.c_ubyte))
+]
+
+X11.XGetGeometry.restype = c_int
+X11.XGetGeometry.argtypes = [
+    Display_p, c_ulong, POINTER(c_ulong), POINTER(c_int), POINTER(c_int),
+    POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int)
+]
+
+X11.XTranslateCoordinates.restype = c_int
+X11.XTranslateCoordinates.argtypes = [
+    Display_p, c_ulong, c_ulong, c_int, c_int, POINTER(c_int), POINTER(c_int), POINTER(c_ulong)
+]
+
+class XClientMessageData(Union):
+    _fields_ = [
+        ('b', ctypes.c_char * 20),
+        ('s', ctypes.c_short * 10),
+        ('l', c_long * 5),
+    ]
+
+class XClientMessageEvent(Structure):
+    _fields_ = [
+        ('type', c_int),
+        ('serial', c_ulong),
+        ('send_event', c_int),
+        ('display', c_void_p),
+        ('window', c_ulong),
+        ('message_type', c_ulong),
+        ('format', c_int),
+        ('data', XClientMessageData),
+    ]
+
+class XEvent(Union):
+    _fields_ = [
+        ('type', c_int),
+        ('xclient', XClientMessageEvent),
+        ('pad', c_long * 24),
+    ]
+
+X11.XSendEvent.restype = c_int
+X11.XSendEvent.argtypes = [Display_p, c_ulong, c_int, c_long, POINTER(XEvent)]
+
+
+class WindowManager:
+    def __init__(self):
+        self.display = X11.XOpenDisplay(None)
+        if not self.display:
+            raise RuntimeError("No se pudo abrir la conexión X11")
+        self.root = X11.XDefaultRootWindow(self.display)
+        self._atoms = {}
+
+    def atom(self, name):
+        if name not in self._atoms:
+            self._atoms[name] = X11.XInternAtom(self.display, name.encode('latin1'), 0)
+        return self._atoms[name]
+
+    def close(self):
+        if self.display:
+            X11.XCloseDisplay(self.display)
+            self.display = None
+
+    def get_property(self, win, prop_name, prop_type=0):
+        prop_atom = self.atom(prop_name)
+        actual_type = c_ulong()
+        actual_format = c_int()
+        nitems = c_ulong()
+        bytes_after = c_ulong()
+        prop_data = POINTER(ctypes.c_ubyte)()
+
+        status = X11.XGetWindowProperty(
+            self.display, win, prop_atom, 0, 1024, 0, prop_type,
+            byref(actual_type), byref(actual_format), byref(nitems), byref(bytes_after),
+            byref(prop_data)
+        )
+        if status != 0 or not prop_data:
+            return None
+        if actual_format.value == 32:
+            ptr = ctypes.cast(prop_data, POINTER(c_long * nitems.value))
+            res = list(ptr.contents)
+        else:
+            res = bytes(prop_data[:nitems.value])
+        X11.XFree(prop_data)
+        return res
+
+    def send_client_msg(self, win, msg_name, data):
+        msg_type = self.atom(msg_name)
+        ev = XEvent()
+        ev.type = 33  # ClientMessage
+        ev.xclient.window = win
+        ev.xclient.message_type = msg_type
+        ev.xclient.format = 32
+        for i in range(min(5, len(data))):
+            ev.xclient.data.l[i] = data[i]
+
+        mask = (1 << 20) | (1 << 19)  # SubstructureRedirectMask | SubstructureNotifyMask
+        X11.XSendEvent(self.display, self.root, 0, mask, byref(ev))
+        X11.XFlush(self.display)
+
+    def get_active_window(self):
+        prop = self.get_property(self.root, "_NET_ACTIVE_WINDOW")
+        if prop and prop[0] != 0:
+            return prop[0]
+        return None
+
+    def get_window_geometry(self, win):
+        rx, ry, rw, rh, bw, depth = c_int(), c_int(), c_int(), c_int(), c_int(), c_int()
+        root_ret = c_ulong()
+        X11.XGetGeometry(self.display, win, byref(root_ret), byref(rx), byref(ry), byref(rw), byref(rh), byref(bw), byref(depth))
+        dx, dy = c_int(), c_int()
+        child_ret = c_ulong()
+        X11.XTranslateCoordinates(self.display, win, self.root, 0, 0, byref(dx), byref(dy), byref(child_ret))
+        return dx.value, dy.value, rw.value, rh.value
+
+    def get_frame_extents(self, win):
+        ext = self.get_property(win, "_NET_FRAME_EXTENTS")
+        if ext and len(ext) >= 4:
+            return ext[0], ext[1], ext[2], ext[3]  # left, right, top, bottom
+        return 0, 0, 0, 0
+
+    def is_maximized(self, win):
+        state = self.get_property(win, "_NET_WM_STATE")
+        if not state:
+            return False
+        max_h = self.atom("_NET_WM_STATE_MAXIMIZED_HORZ")
+        max_v = self.atom("_NET_WM_STATE_MAXIMIZED_VERT")
+        return (max_h in state) and (max_v in state)
+
+    def set_maximized(self, win, maximize=True):
+        max_h = self.atom("_NET_WM_STATE_MAXIMIZED_HORZ")
+        max_v = self.atom("_NET_WM_STATE_MAXIMIZED_VERT")
+        action = 1 if maximize else 0
+        self.send_client_msg(win, "_NET_WM_STATE", [action, max_h, max_v, 2, 0])
+
+    def minimize(self, win):
+        self.send_client_msg(win, "WM_CHANGE_STATE", [3, 0, 0, 0, 0])
+
+    def get_workarea(self, win_x=0, win_y=0):
+        wa = self.get_property(self.root, "_NET_WORKAREA")
+        if wa and len(wa) >= 4:
+            gx, gy, gw, gh = wa[0], wa[1], wa[2], wa[3]
+        else:
+            gx, gy, gw, gh = 0, 0, 1920, 1080
+
+        try:
+            out = subprocess.check_output(["xrandr", "--listmonitors"], text=True)
+            for line in out.splitlines()[1:]:
+                parts = line.strip().split()
+                if len(parts) >= 3:
+                    geom = parts[2]
+                    m = re.match(r'(\d+)(?:/\d+)?x(\d+)(?:/\d+)?\+(\d+)\+(\d+)', geom)
+                    if m:
+                        mw, mh, mx, my = map(int, m.groups())
+                        if mx <= win_x < mx + mw and my <= win_y < my + mh:
+                            ix = max(gx, mx)
+                            iy = max(gy, my)
+                            iw = min(gx + gw, mx + mw) - ix
+                            ih = min(gy + gh, my + mh) - iy
+                            return ix, iy, iw, ih
+        except Exception:
+            pass
+        return gx, gy, gw, gh
+
+    def move_resize(self, win, target_x, target_y, target_w, target_h):
+        if self.is_maximized(win):
+            self.set_maximized(win, False)
+            time.sleep(0.04)
+
+        fl, fr, ft, fb = self.get_frame_extents(win)
+        cw = max(100, target_w - fl - fr)
+        ch = max(100, target_h - ft - fb)
+
+        flags = 0x2F01  # NorthWest gravity + x, y, w, h + source application
+        self.send_client_msg(win, "_NET_MOVERESIZE_WINDOW", [flags, target_x, target_y, cw, ch])
+
+
+def load_state():
+    try:
+        if os.path.exists(STATE_FILE):
+            with open(STATE_FILE, "r") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+
+def save_state(state):
+    try:
+        os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+        with open(STATE_FILE, "w") as f:
+            json.dump(state, f)
+    except Exception:
+        pass
+
+
+def calc_geometry(wa_x, wa_y, wa_w, wa_h, slot, ratio_idx, v_mode):
+    if slot == "top_half":
+        return wa_x, wa_y, wa_w, wa_h // 2
+    if slot == "bottom_half":
+        return wa_x, wa_y + wa_h // 2, wa_w, wa_h // 2
+
+    r = RATIOS[ratio_idx]
+    w = int(wa_w * r)
+
+    if slot == "left":
+        x = wa_x
+    elif slot == "center":
+        x = wa_x + (wa_w - w) // 2
+    elif slot == "right":
+        x = wa_x + wa_w - w
+    else:
+        x = wa_x
+
+    if v_mode == "top":
+        y = wa_y
+        h = wa_h // 2
+    elif v_mode == "bottom":
+        y = wa_y + wa_h // 2
+        h = wa_h // 2
+    else:  # "full"
+        y = wa_y
+        h = wa_h
+
+    return x, y, w, h
+
+
+def detect_current_state(ox, oy, ow, oh, is_max, wa_x, wa_y, wa_w, wa_h):
+    if is_max:
+        return "maximized", 0, "full"
+
+    # Mitades horizontales completas (100% ancho)
+    if ow >= wa_w * 0.88 and abs(ox - wa_x) < 35:
+        if abs(oy - wa_y) < 30 and oh <= wa_h * 0.65:
+            return "top_half", 0, "top"
+        if abs(oy + oh - (wa_y + wa_h)) < 30 and oh <= wa_h * 0.65:
+            return "bottom_half", 0, "bottom"
+
+    # Modo vertical
+    if oh >= wa_h * 0.85:
+        v_mode = "full"
+    elif abs(oy - wa_y) < 30:
+        v_mode = "top"
+    elif abs(oy + oh - (wa_y + wa_h)) < 30:
+        v_mode = "bottom"
+    else:
+        v_mode = "full"
+
+    # Ratio de ancho más cercano
+    ratio_idx = min(range(len(RATIOS)), key=lambda i: abs(ow / wa_w - RATIOS[i]))
+
+    # Slot horizontal
+    if abs(ox - wa_x) < 35:
+        slot = "left"
+    elif abs(ox + ow - (wa_x + wa_w)) < 35:
+        slot = "right"
+    elif abs((ox + ow // 2) - (wa_x + wa_w // 2)) < 60:
+        slot = "center"
+    else:
+        slot = None  # Flotante libre
+
+    return slot, ratio_idx, v_mode
+
+
+def handle_action(direction):
+    wm = WindowManager()
+    try:
+        win = wm.get_active_window()
+        if not win or win == wm.root:
+            return
+
+        now = time.time()
+        state = load_state()
+        prev_win = state.get("win")
+        prev_time = state.get("time", 0)
+        is_same_session = (prev_win == win and (now - prev_time) < CYCLE_TIMEOUT)
+
+        # Protección antirrebote de teclado físico
+        if is_same_session and (now - prev_time) < DEBOUNCE_TIME:
+            return
+
+        min_armed = (is_same_session and state.get("min_armed", False))
+
+        cur_x, cur_y, cur_w, cur_h = wm.get_window_geometry(win)
+        fl, fr, ft, fb = wm.get_frame_extents(win)
+        outer_w = cur_w + fl + fr
+        outer_h = cur_h + ft + fb
+        outer_x = cur_x - fl
+        outer_y = cur_y - ft
+
+        wa_x, wa_y, wa_w, wa_h = wm.get_workarea(cur_x + cur_w // 2, cur_y + cur_h // 2)
+        is_max = wm.is_maximized(win)
+
+        if is_same_session and state.get("slot"):
+            cur_slot = state.get("slot")
+            cur_ratio = state.get("ratio_idx", 0)
+            cur_vmode = state.get("v_mode", "full")
+        else:
+            cur_slot, cur_ratio, cur_vmode = detect_current_state(
+                outer_x, outer_y, outer_w, outer_h, is_max, wa_x, wa_y, wa_w, wa_h
+            )
+
+        # -------------------------------------------------------------
+        # ACCIÓN: IZQUIERDA
+        # -------------------------------------------------------------
+        if direction == "left":
+            if cur_slot == "right":
+                next_slot = "center"
+                next_ratio = cur_ratio
+                next_vmode = cur_vmode
+            elif cur_slot == "center":
+                next_slot = "left"
+                next_ratio = cur_ratio
+                next_vmode = cur_vmode
+            elif cur_slot == "left":
+                next_slot = "left"
+                next_ratio = (cur_ratio + 1) % len(RATIOS)
+                next_vmode = cur_vmode
+            elif cur_slot == "top_half":
+                next_slot = "left"
+                next_ratio = 0
+                next_vmode = "top"
+            elif cur_slot == "bottom_half":
+                next_slot = "left"
+                next_ratio = 0
+                next_vmode = "bottom"
+            else:
+                next_slot = "left"
+                next_ratio = 0
+                next_vmode = "full"
+
+            tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, next_slot, next_ratio, next_vmode)
+            wm.move_resize(win, tx, ty, tw, th)
+            save_state({
+                "win": win, "slot": next_slot, "ratio_idx": next_ratio,
+                "v_mode": next_vmode, "min_armed": False, "time": now
+            })
+
+        # -------------------------------------------------------------
+        # ACCIÓN: DERECHA
+        # -------------------------------------------------------------
+        elif direction == "right":
+            if cur_slot == "left":
+                next_slot = "center"
+                next_ratio = cur_ratio
+                next_vmode = cur_vmode
+            elif cur_slot == "center":
+                next_slot = "right"
+                next_ratio = cur_ratio
+                next_vmode = cur_vmode
+            elif cur_slot == "right":
+                next_slot = "right"
+                next_ratio = (cur_ratio + 1) % len(RATIOS)
+                next_vmode = cur_vmode
+            elif cur_slot == "top_half":
+                next_slot = "right"
+                next_ratio = 0
+                next_vmode = "top"
+            elif cur_slot == "bottom_half":
+                next_slot = "right"
+                next_ratio = 0
+                next_vmode = "bottom"
+            else:
+                next_slot = "right"
+                next_ratio = 0
+                next_vmode = "full"
+
+            tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, next_slot, next_ratio, next_vmode)
+            wm.move_resize(win, tx, ty, tw, th)
+            save_state({
+                "win": win, "slot": next_slot, "ratio_idx": next_ratio,
+                "v_mode": next_vmode, "min_armed": False, "time": now
+            })
+
+        # -------------------------------------------------------------
+        # ACCIÓN: ARRIBA
+        # -------------------------------------------------------------
+        elif direction == "up":
+            if is_max:
+                return
+
+            if cur_slot in ("left", "center", "right"):
+                if cur_vmode == "bottom":
+                    # De abajo pasa a columna completa
+                    next_vmode = "full"
+                    tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, cur_slot, cur_ratio, next_vmode)
+                    wm.move_resize(win, tx, ty, tw, th)
+                    save_state({
+                        "win": win, "slot": cur_slot, "ratio_idx": cur_ratio,
+                        "v_mode": next_vmode, "min_armed": False, "time": now
+                    })
+                elif cur_vmode == "full":
+                    # De columna completa pasa a cuadrante superior
+                    next_vmode = "top"
+                    tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, cur_slot, cur_ratio, next_vmode)
+                    wm.move_resize(win, tx, ty, tw, th)
+                    save_state({
+                        "win": win, "slot": cur_slot, "ratio_idx": cur_ratio,
+                        "v_mode": next_vmode, "min_armed": False, "time": now
+                    })
+                else:
+                    # Ya estaba en cuadrante superior -> Maximizar
+                    wm.set_maximized(win, True)
+                    save_state({
+                        "win": win, "slot": "maximized", "ratio_idx": 0,
+                        "v_mode": "full", "min_armed": False, "time": now
+                    })
+
+            elif cur_slot == "bottom_half":
+                # De mitad inferior pasa a mitad superior
+                tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, "top_half", 0, "top")
+                wm.move_resize(win, tx, ty, tw, th)
+                save_state({
+                    "win": win, "slot": "top_half", "ratio_idx": 0,
+                    "v_mode": "top", "min_armed": False, "time": now
+                })
+
+            elif cur_slot == "top_half":
+                # Ya estaba en mitad superior -> Maximizar
+                wm.set_maximized(win, True)
+                save_state({
+                    "win": win, "slot": "maximized", "ratio_idx": 0,
+                    "v_mode": "full", "min_armed": False, "time": now
+                })
+
+            else:
+                # Flotante libre -> Mitad superior (100% ancho, 50% alto)
+                tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, "top_half", 0, "top")
+                wm.move_resize(win, tx, ty, tw, th)
+                save_state({
+                    "win": win, "slot": "top_half", "ratio_idx": 0,
+                    "v_mode": "top", "min_armed": False, "time": now
+                })
+
+        # -------------------------------------------------------------
+        # ACCIÓN: ABAJO
+        # -------------------------------------------------------------
+        elif direction == "down":
+            if is_max:
+                # Desmaximizar / Restaurar a mitad superior
+                wm.set_maximized(win, False)
+                time.sleep(0.04)
+                tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, "top_half", 0, "top")
+                wm.move_resize(win, tx, ty, tw, th)
+                save_state({
+                    "win": win, "slot": "top_half", "ratio_idx": 0,
+                    "v_mode": "top", "min_armed": False, "time": now
+                })
+                return
+
+            # Caso 1: Ventana en columna lateral/central
+            if cur_slot in ("left", "center", "right"):
+                if cur_vmode == "top":
+                    # De cuadrante superior baja a columna completa
+                    next_vmode = "full"
+                    tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, cur_slot, cur_ratio, next_vmode)
+                    wm.move_resize(win, tx, ty, tw, th)
+                    save_state({
+                        "win": win, "slot": cur_slot, "ratio_idx": cur_ratio,
+                        "v_mode": next_vmode, "min_armed": False, "time": now
+                    })
+                elif cur_vmode == "full":
+                    # De columna completa baja a cuadrante inferior
+                    next_vmode = "bottom"
+                    tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, cur_slot, cur_ratio, next_vmode)
+                    wm.move_resize(win, tx, ty, tw, th)
+                    save_state({
+                        "win": win, "slot": cur_slot, "ratio_idx": cur_ratio,
+                        "v_mode": next_vmode, "min_armed": False, "time": now
+                    })
+                else:
+                    # Está en cuadrante inferior:
+                    # Requiere un clic adicional de confirmación para minimizar
+                    if not min_armed:
+                        save_state({
+                            "win": win, "slot": cur_slot, "ratio_idx": cur_ratio,
+                            "v_mode": "bottom", "min_armed": True, "time": now
+                        })
+                    else:
+                        wm.minimize(win)
+                        save_state({
+                            "win": win, "slot": None, "ratio_idx": 0,
+                            "v_mode": "full", "min_armed": False, "time": now
+                        })
+
+            # Caso 2: Ventana en mitad superior
+            elif cur_slot == "top_half":
+                # De mitad superior baja a mitad inferior
+                tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, "bottom_half", 0, "bottom")
+                wm.move_resize(win, tx, ty, tw, th)
+                # Al llegar a la baja, se asegura que no se minimice de inmediato
+                save_state({
+                    "win": win, "slot": "bottom_half", "ratio_idx": 0,
+                    "v_mode": "bottom", "min_armed": False, "time": now
+                })
+
+            # Caso 3: Ventana en mitad inferior
+            elif cur_slot == "bottom_half":
+                # Está en mitad inferior:
+                # Requiere un clic adicional de confirmación para minimizar
+                if not min_armed:
+                    save_state({
+                        "win": win, "slot": "bottom_half", "ratio_idx": 0,
+                        "v_mode": "bottom", "min_armed": True, "time": now
+                    })
+                else:
+                    wm.minimize(win)
+                    save_state({
+                        "win": win, "slot": None, "ratio_idx": 0,
+                        "v_mode": "full", "min_armed": False, "time": now
+                    })
+
+            # Caso 4: Flotante libre
+            else:
+                # Primer toque hacia abajo posiciona en mitad inferior
+                tx, ty, tw, th = calc_geometry(wa_x, wa_y, wa_w, wa_h, "bottom_half", 0, "bottom")
+                wm.move_resize(win, tx, ty, tw, th)
+                save_state({
+                    "win": win, "slot": "bottom_half", "ratio_idx": 0,
+                    "v_mode": "bottom", "min_armed": False, "time": now
+                })
+
+    finally:
+        wm.close()
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2 or sys.argv[1] not in ("left", "right", "up", "down"):
+        print(f"Uso: {sys.argv[0]} [left|right|up|down]")
+        sys.exit(1)
+    handle_action(sys.argv[1])

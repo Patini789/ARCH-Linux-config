@@ -9,8 +9,16 @@ Un entorno de trabajo completo para **Arch Linux + Cinnamon**, optimizado para d
   * `Win + Tab` -> Buscador de Ventanas en Cualquier Monitor
   * `Win + X` -> Menú de Energía (Apagar/Reiniciar)
   * `Win + /` -> Panel Flotante de Atajos y Comandos de Terminal (`eza`, `bat`, `ripgrep`, `fd`, `yazi`, etc.)
-  * `Win + G` -> Siguiente Fondo de Pantalla + Sincronización RGB
+  * `Win + Flechas` -> Smart Tile (Ventanas: ciclos 50% -> 33.3% -> 66.7%, columna central y cuadrantes)
+  * `Win + Shift + C` -> Gardevoir Poké-Calc (Calculadora Glassmorphism Pokémon)
+  * `Win + Shift + T` -> Gardevoir TimeDex (Reloj, Temporizador, Cronómetro, Alarmas y Clima)
+  * `Win + J / K / N` -> Control Multimedia (Anterior, Play/Pausa, Siguiente)
+  * `Win + }` -> Cambiar Idioma de Teclado (ES / EN con sonido Pokémon)
   * `Win + Enter` -> Terminal Kitty con Pokémon
+* **Widgets e Integración Inteligente:**
+  * **Reloj con Clima en Tiempo Real:** Conky y TimeDex integran el estado meteorológico por IP mediante Open-Meteo sin API key.
+  * **Control Táctil de Ventanas:** Gestos multitáctiles con Touchégg (3 dedos para minimizar/maximizar y Alt+Tab; 4 dedos para escritorios).
+  * **Inhibición Inteligente de Suspensión:** No apaga la pantalla mientras haya música sonando en PipeWire.
 * **Herramientas Modernas de Terminal (CLI):**
   * `ls` / `ll` / `tree` -> `eza` (Iconos, colores, tamaños legibles y árbol)
   * `cat` -> `bat` (Resaltado de sintaxis, paginación y números de línea)
@@ -48,3 +56,7 @@ cd ~/dotfiles
 ![Tema Gardevoir brillante](screenshots/gardevoir-shiny.png)
 
 ![Sprites Pokémon en terminal](screenshots/gardevoir-terminal-sprites.png)
+
+## Proyecto opcional: Gardevoir SoundDex
+
+Reproductor Pokédex para YouTube Music en ventana-app de Brave, con arranque aleatorio y MPRIS. Instala con `bash extras/pokedex-player/install.sh`; después aparece al buscar **reproductor** en Rofi (**Win + Espacio**). La vista previa y la extensión local están en [`extras/pokedex-player/`](extras/pokedex-player/). `pokedex.css` queda como tema opcional para Pear Desktop/th-ch.

@@ -1,0 +1,13 @@
+[Unit]
+Description=GLava Intelligent Audio & Power Controller
+After=pipewire.service wireplumber.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/glava-controller.sh
+Restart=on-failure
+RestartSec=3s
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=default.target

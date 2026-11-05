@@ -1,0 +1,253 @@
+/*
+ * Pokédex Player — tema Gardevoir Shiny para YouTube Music Desktop (th-ch).
+ * Press Start 2P y Silkscreen se usan como fuentes del sistema; el instalador
+ * de estos dotfiles ya copia ambas desde ~/.local/share/fonts.
+ *
+ * El tema conserva la estructura y controles de YouTube Music. Los breakpoints
+ * reajustan la barra del reproductor cuando se estrecha o miniaturiza la ventana.
+ */
+
+:root {
+  --dex-red: #c72d4b;
+  --dex-red-hot: #ef536c;
+  --dex-red-deep: #54172a;
+  --dex-ink: #180d12;
+  --dex-panel: #26131c;
+  --dex-cream: #fff3e4;
+  --dex-muted: #cfb5b4;
+  --dex-pink: #f28aaa;
+  --dex-mint: #8fd3ad;
+
+  --ytmusic-brand-red: var(--dex-red-hot);
+  --ytmusic-color-red: var(--dex-red-hot);
+  --ytmusic-color-black1: #130b10;
+  --ytmusic-color-black2: #211018;
+  --ytmusic-color-black3: #321521;
+  --ytmusic-color-black4: #492030;
+  --ytmusic-color-white1: var(--dex-cream);
+  --ytmusic-color-white2: #f1ded4;
+  --ytmusic-color-white3: #d2b9b7;
+  --ytmusic-color-white4: #a98e92;
+  --ytmusic-background: #130b10;
+  --ytmusic-nav-bar: rgba(37, 15, 25, 0.96);
+  --ytmusic-player-bar-background: #3b1422;
+  --ytmusic-text-primary: var(--dex-cream);
+  --ytmusic-text-secondary: var(--dex-muted);
+  --ytmusic-icon-color: var(--dex-cream);
+  --ytmusic-responsive-font-size: clamp(11px, 0.95vw, 14px);
+
+  color-scheme: dark;
+  accent-color: var(--dex-pink);
+}
+
+html,
+body,
+ytmusic-app,
+ytmusic-app-layout,
+#layout,
+#content {
+  background-color: var(--dex-ink) !important;
+  color: var(--dex-cream);
+}
+
+body,
+ytmusic-app {
+  font-family: "Silkscreen", "Press Start 2P", monospace !important;
+}
+
+ytmusic-nav-bar,
+#nav-bar {
+  border-bottom: 1px solid rgba(242, 138, 170, 0.22) !important;
+  background: linear-gradient(180deg, #351321, #251019 88%) !important;
+  box-shadow: 0 5px 20px rgba(7, 3, 6, 0.24);
+}
+
+ytmusic-browse-response,
+ytmusic-search-page,
+ytmusic-player-page,
+ytmusic-playlist-page,
+ytmusic-library-page {
+  --ytmusic-background: #130b10;
+  color: var(--dex-cream);
+}
+
+ytmusic-player-bar {
+  min-height: 78px !important;
+  border-top: 1px solid rgba(255, 195, 194, 0.27) !important;
+  border-radius: 13px 13px 0 0 !important;
+  background:
+    linear-gradient(115deg, rgba(239, 83, 108, 0.15), transparent 38%),
+    linear-gradient(180deg, #4a192b 0%, #2c111d 100%) !important;
+  box-shadow: 0 -9px 32px rgba(8, 3, 7, 0.3), inset 0 1px rgba(255, 231, 216, 0.12);
+  color: var(--dex-cream) !important;
+  backdrop-filter: blur(14px);
+}
+
+ytmusic-player-bar #left-content,
+ytmusic-player-bar #middle-content,
+ytmusic-player-bar #right-content {
+  min-width: 0 !important;
+}
+
+ytmusic-player-bar #song-image,
+ytmusic-player-bar #song-image img,
+ytmusic-player-bar #thumbnail,
+ytmusic-player-bar #thumbnail img {
+  overflow: hidden;
+  border: 2px solid rgba(255, 221, 207, 0.75) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px rgba(10, 3, 7, 0.28), 0 0 0 2px rgba(242, 138, 170, 0.16);
+}
+
+ytmusic-player-bar #title,
+ytmusic-player-bar .title {
+  color: var(--dex-cream) !important;
+  font-family: "Press Start 2P", "Silkscreen", monospace !important;
+  font-size: clamp(8px, 0.66vw, 10px) !important;
+  line-height: 1.7 !important;
+}
+
+ytmusic-player-bar #subtitle,
+ytmusic-player-bar .byline,
+ytmusic-player-bar #byline {
+  color: var(--dex-muted) !important;
+  font-family: "Silkscreen", monospace !important;
+  font-size: 12px !important;
+}
+
+ytmusic-player-bar yt-icon,
+ytmusic-player-bar tp-yt-paper-icon-button,
+ytmusic-player-bar yt-icon-button {
+  color: var(--dex-cream) !important;
+}
+
+ytmusic-player-bar tp-yt-paper-icon-button,
+ytmusic-player-bar yt-icon-button {
+  border-radius: 50% !important;
+  transition: background-color 140ms ease, transform 140ms ease;
+}
+
+ytmusic-player-bar tp-yt-paper-icon-button:hover,
+ytmusic-player-bar yt-icon-button:hover {
+  transform: translateY(-1px);
+  background: rgba(242, 138, 170, 0.16) !important;
+}
+
+ytmusic-player-bar #play-pause-button,
+ytmusic-player-bar #play-pause-button tp-yt-paper-icon-button {
+  border: 1px solid rgba(255, 228, 215, 0.6) !important;
+  border-radius: 50% !important;
+  background: linear-gradient(145deg, #f05f79, #be2d4d) !important;
+  box-shadow: 0 2px 10px rgba(11, 3, 8, 0.25), inset 0 1px rgba(255, 245, 226, 0.26);
+}
+
+ytmusic-player-bar #progress-bar,
+ytmusic-player-bar #sliderBar {
+  --paper-slider-active-color: var(--dex-pink);
+  --paper-slider-knob-color: var(--dex-cream);
+  --paper-slider-container-color: rgba(255, 243, 228, 0.24);
+  accent-color: var(--dex-pink);
+}
+
+ytmusic-chip-cloud-chip-renderer,
+ytmusic-toggle-button-renderer,
+ytmusic-menu-renderer {
+  --ytmusic-color-foreground: var(--dex-cream);
+  --ytmusic-color-text-secondary: var(--dex-muted);
+}
+
+ytmusic-chip-cloud-chip-renderer iron-button,
+ytmusic-chip-cloud-chip-renderer button {
+  border: 1px solid rgba(242, 138, 170, 0.28) !important;
+  border-radius: 999px !important;
+  background: rgba(112, 38, 62, 0.2) !important;
+}
+
+/* Compacta sin quitar búsqueda, volumen, cola ni controles principales. */
+@media (max-width: 760px) {
+  :root {
+    --ytmusic-responsive-font-size: 12px;
+  }
+
+  ytmusic-player-bar {
+    min-height: 72px !important;
+    border-radius: 10px 10px 0 0 !important;
+  }
+
+  ytmusic-player-bar #song-image,
+  ytmusic-player-bar #song-image img,
+  ytmusic-player-bar #thumbnail,
+  ytmusic-player-bar #thumbnail img {
+    width: 46px !important;
+    height: 46px !important;
+  }
+
+  ytmusic-player-bar #left-content,
+  ytmusic-player-bar #middle-content,
+  ytmusic-player-bar #right-content {
+    flex-shrink: 1 !important;
+  }
+
+  ytmusic-player-bar #title,
+  ytmusic-player-bar .title {
+    font-size: 8px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  ytmusic-player-bar {
+    min-height: 64px !important;
+    padding-inline: 6px !important;
+    border-radius: 8px 8px 0 0 !important;
+  }
+
+  ytmusic-player-bar #song-image,
+  ytmusic-player-bar #song-image img,
+  ytmusic-player-bar #thumbnail,
+  ytmusic-player-bar #thumbnail img {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 6px !important;
+  }
+
+  ytmusic-player-bar #title,
+  ytmusic-player-bar .title {
+    font-size: 7px !important;
+  }
+
+  ytmusic-player-bar #subtitle,
+  ytmusic-player-bar .byline,
+  ytmusic-player-bar #byline {
+    font-size: 10px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  ytmusic-player-bar {
+    padding-inline: 2px !important;
+  }
+
+  ytmusic-player-bar #song-image,
+  ytmusic-player-bar #song-image img,
+  ytmusic-player-bar #thumbnail,
+  ytmusic-player-bar #thumbnail img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  ytmusic-player-bar #title,
+  ytmusic-player-bar .title {
+    font-size: 6px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

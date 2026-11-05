@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=Gardevoir SoundDex
+Name[es]=Gardevoir SoundDex — Reproductor
+GenericName=Reproductor de música
+Comment=YouTube Music en una Pokédex Gardevoir Shiny
+Exec="@LAUNCHER@"
+TryExec=@BRAVE@
+Icon=@ICON@
+Terminal=false
+StartupNotify=true
+StartupWMClass=GardevoirSoundDex
+Categories=AudioVideo;Audio;Player;
+Keywords=reproductor;musica;youtubemusic;youtube;playlist;pokedex;gardevoir;shiny;

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Gardevoir TimeDex
+Name[es]=Gardevoir TimeDex — Reloj, Timer y Alarmas
+GenericName=Reloj y Temporizador
+Comment=Suite de tiempo con estética Glassmorphism y Pokémon para Arch Linux
+Exec=/home/patini/.local/bin/gardevoir-timedex
+Icon=/home/patini/.local/share/gardevoir-greeter/avatar.png
+Terminal=false
+StartupNotify=true
+StartupWMClass=gardevoir-timedex
+Categories=Utility;Clock;Timer;
+Keywords=reloj;timer;temporizador;cronometro;stopwatch;alarma;alarm;pokemon;gardevoir;glass;

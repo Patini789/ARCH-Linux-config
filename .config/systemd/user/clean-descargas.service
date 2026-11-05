@@ -1,0 +1,7 @@
+[Unit]
+Description=Mover archivos antiguos de Descargas a la Papelera (>15 días)
+Documentation=man:gio(1)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/clean-descargas.sh

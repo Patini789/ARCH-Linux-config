@@ -1,0 +1,25 @@
+{
+  "sound": false,
+  "default_tab": 3,
+  "alarm_sound_path": "/home/patini/.local/share/sounds/pokemon/Ultra_Necrozma_Gardevoir_Alarm.mp3",
+  "world_clocks": [
+    {
+      "name": "Tokio (Jap\u00f3n)",
+      "tz": "Asia/Tokyo"
+    },
+    {
+      "name": "Madrid (Espa\u00f1a)",
+      "tz": "Europe/Madrid"
+    },
+    {
+      "name": "Nueva York (EE. UU.)",
+      "tz": "America/New_York"
+    }
+  ],
+  "timer_presets": [
+    60,
+    300,
+    600,
+    1500
+  ]
+}

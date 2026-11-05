@@ -19,16 +19,16 @@ CHOICE=$(echo -e "$OPTIONS" | rofi -dmenu -i -theme "${HOME}/.config/rofi/powerm
 
 case "$CHOICE" in
     *"Apagar"*)
-        systemctl poweroff
+        systemctl poweroff -i
         ;;
     *"Reiniciar"*)
-        systemctl reboot
+        systemctl reboot -i
         ;;
     *"Bloquear"*)
         cinnamon-screensaver-command -l
         ;;
     *"Suspender"*)
-        systemctl suspend
+        systemctl suspend -i
         ;;
     *"Cerrar Sesión"*)
         cinnamon-session-quit --logout --no-prompt

@@ -10,12 +10,11 @@ env.setdefault('XAUTHORITY', os.path.expanduser('~/.Xauthority'))
 OPACITY_EDITORS = "4166118276" # 97% Opacidad (Antigravity, VS Code, Godot - Máxima legibilidad)
 OPACITY_BRAVE   = "4080218930" # 95% Opacidad (Brave)
 OPACITY_APPS    = "4037269257" # 94% Opacidad (Nemo, Discord, otras apps)
-OPACITY_FULLSCREEN = "4080218930" # 95% Opacidad en pantalla completa
-OPACITY_VIDEO_FULLSCREEN = "4294967295" # 100% para vídeos a pantalla completa
 
 EDITOR_CLASSES   = ['code', 'vscodium', 'antigravity', 'godot', 'sublime', 'cursor']
-TERMINAL_CLASSES = ['kitty', 'gnome-terminal', 'org.gnome.terminal', 'x-terminal-emulator']
+CUSTOM_TRANSPARENT = ['kitty', 'gnome-terminal', 'org.gnome.terminal', 'x-terminal-emulator', 'gardevoir-calc', 'gardevoir-timedex']
 VIDEO_CLASSES    = ['brave', 'firefox', 'chromium', 'librewolf', 'discord', 'vlc', 'mpv', 'celluloid']
+GAME_CLASSES     = ['steam', 'steam_app_', 'heroic', 'lutris', 'wine', 'proton', 'retroarch', 'gamescope', 'minecraft', 'cemu', 'dolphin-emu', 'rpcs3', 'yuzu', 'ryujinx', 'pcsx2']
 
 def sync():
     try:
@@ -31,23 +30,25 @@ def sync():
             if 'nemo-desktop' in info or 'cinnamon' in info or 'conky' in info:
                 continue
                 
-            # Solo F11/video: maximizar no debe contar como pantalla completa.
+            # 1. PANTALLA COMPLETA -> 100% sólido y sin opacidad para todo (juegos, videos, etc.)
+            # Al remover _NET_WM_WINDOW_OPACITY, Muffin activa el unredirection directo para máximos FPS.
             is_fullscreen = '_net_wm_state_fullscreen' in info
-                    
-            # Apps en fullscreen conservan transparencia; multimedia se vuelve sólido.
             if is_fullscreen:
-                target = OPACITY_VIDEO_FULLSCREEN if any(app in info for app in VIDEO_CLASSES) else OPACITY_FULLSCREEN
-                subprocess.run(['xprop', '-id', wid, '-f', '_NET_WM_WINDOW_OPACITY', '32c', '-set', '_NET_WM_WINDOW_OPACITY', target], capture_output=True, env=env)
+                subprocess.run(['xprop', '-id', wid, '-remove', '_NET_WM_WINDOW_OPACITY'], capture_output=True, env=env)
+                continue
+
+            # 2. JUEGOS Y EMULADORES -> Siempre 100% sólidos (incluso en modo ventana)
+            if any(game in info for game in GAME_CLASSES):
+                subprocess.run(['xprop', '-id', wid, '-remove', '_NET_WM_WINDOW_OPACITY'], capture_output=True, env=env)
                 continue
                 
-            # 2. MODO VENTANA -> Asignar opacidad correspondiente
+            # 3. MODO VENTANA -> Asignar opacidad correspondiente
             if any(ed in info for ed in EDITOR_CLASSES):
                 target = OPACITY_EDITORS
             elif 'brave' in info:
                 target = OPACITY_BRAVE
-            elif any(term in info for term in TERMINAL_CLASSES):
-                # Kitty ya gestiona su propia transparencia; no acumular otra
-                # capa de opacidad X11 encima de background_opacity.
+            elif any(term in info for term in CUSTOM_TRANSPARENT):
+                # Ya gestionan su propia transparencia por RGBA; no acumular capa global
                 subprocess.run(['xprop', '-id', wid, '-remove', '_NET_WM_WINDOW_OPACITY'], capture_output=True, env=env)
                 continue
             else:

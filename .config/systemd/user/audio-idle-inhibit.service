@@ -1,0 +1,13 @@
+[Unit]
+Description=Audio Idle & Dim Inhibit Controller (Cinnamon)
+After=pipewire.service wireplumber.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/audio-idle-inhibit.sh
+Restart=on-failure
+RestartSec=3s
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=default.target

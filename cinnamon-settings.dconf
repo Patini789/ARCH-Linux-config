@@ -14,10 +14,11 @@ next-applet-id=15
 next-desklet-id=2
 panel-edit-mode=false
 panel-zone-icon-sizes='[{"panelId": 1, "left": 0, "center": 22, "right": 24}]'
-panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 28, "center": 28, "right": 16}]'
+panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 30, "center": 28, "right": 16}]'
 panels-autohide=['1:false']
 panels-enabled=['1:0:bottom']
 panels-height=['1:40']
+show-media-keys-osd=true
 
 [desktop/applications/terminal]
 exec='kitty'
@@ -25,12 +26,12 @@ exec-arg='-e'
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///home/patini/Pictures/Gardevoir/Wallpapers/6356693_upscayl_4x_digital-art-4x.png'
+picture-uri='file:///home/patini/Imágenes/Gardevoir/Wallpapers/38f786184f7bf796bdd5a2b162c10d44_upscayl_4x_digital-art-4x_blur.png'
 primary-color='#1e1e2e'
 secondary-color='#1e1e2e'
 
 [desktop/input-sources]
-sources=[('xkb', 'latam')]
+sources=[('xkb', 'latam'), ('xkb', 'us')]
 
 [desktop/interface]
 cursor-size=36
@@ -39,10 +40,11 @@ font-name='Inter 11'
 gtk-im-module='ibus'
 gtk-theme='Adwaita-dark'
 icon-theme='Papirus-Dark'
+keyboard-layout-use-upper=true
 text-scaling-factor=1.0
 
 [desktop/keybindings]
-custom-list=['custom0', 'custom1', 'custom2', 'custom3', 'custom4', 'custom5', 'custom6', 'custom7', 'custom8', 'custom9']
+custom-list=['custom0', 'custom1', 'custom2', 'custom3', 'custom4', 'custom5', 'custom6', 'custom7', 'custom8', 'custom9', 'custom10', 'custom11', 'custom12', 'custom13', 'custom14', 'custom15', 'custom16', 'custom17', 'custom18', 'custom19']
 looking-glass-keybinding=@as []
 show-desklets=@as []
 
@@ -55,6 +57,56 @@ name='Historial de Portapapeles (Win+V)'
 binding=['<Primary><Shift>Escape']
 command='gnome-system-monitor'
 name='Monitor del Sistema'
+
+[desktop/keybindings/custom-keybindings/custom10]
+binding=['<Super>Left']
+command='/home/patini/.local/bin/smart-tile left'
+name='Smart Tile Left'
+
+[desktop/keybindings/custom-keybindings/custom11]
+binding=['<Super>Right']
+command='/home/patini/.local/bin/smart-tile right'
+name='Smart Tile Right'
+
+[desktop/keybindings/custom-keybindings/custom12]
+binding=['<Super>Up']
+command='/home/patini/.local/bin/smart-tile up'
+name='Smart Tile Up'
+
+[desktop/keybindings/custom-keybindings/custom13]
+binding=['<Super>Down']
+command='/home/patini/.local/bin/smart-tile down'
+name='Smart Tile Down'
+
+[desktop/keybindings/custom-keybindings/custom14]
+binding=['<Super>braceright']
+command='/home/patini/.local/bin/toggle-keyboard-layout.sh'
+name='Cambiar Idioma de Teclado (Win + })'
+
+[desktop/keybindings/custom-keybindings/custom15]
+binding=['<Super>j']
+command='/home/patini/.local/bin/media-control.sh previous'
+name='Multimedia: Canción Anterior (Win + J)'
+
+[desktop/keybindings/custom-keybindings/custom16]
+binding=['<Super>k']
+command='/home/patini/.local/bin/media-control.sh play-pause'
+name='Multimedia: Play / Pausa (Win + K)'
+
+[desktop/keybindings/custom-keybindings/custom17]
+binding=['<Super>n']
+command='/home/patini/.local/bin/media-control.sh next'
+name='Multimedia: Siguiente Canción (Win + N)'
+
+[desktop/keybindings/custom-keybindings/custom18]
+binding=['<Super><Shift>c', '<Shift><Super>c']
+command='/home/patini/.local/bin/gardevoir-calc'
+name='Gardevoir Poké-Calc (Win + Shift + C)'
+
+[desktop/keybindings/custom-keybindings/custom19]
+binding=['<Super><Shift>t', '<Shift><Super>t']
+command='/home/patini/.local/bin/gardevoir-timedex'
+name='Gardevoir TimeDex (Win + Shift + T)'
 
 [desktop/keybindings/custom-keybindings/custom2]
 binding=['<Super>l']
@@ -117,17 +169,17 @@ move-to-corner-nw=['<Super><Alt>Left', '<Super><Alt>Up']
 move-to-corner-se=['<Super><Alt>Page_Down']
 move-to-corner-sw=['<Super><Alt>Down']
 move-to-workspace-1=['<Super><Shift>exclam', '<Super><Shift>1']
-move-to-workspace-2=['<Super><Shift>at', '<Super><Shift>2']
-move-to-workspace-3=['<Super><Shift>numbersign', '<Super><Shift>3']
+move-to-workspace-2=['<Super><Shift>at', '<Super><Shift>quotedbl', '<Super><Shift>2']
+move-to-workspace-3=['<Super><Shift>numbersign', '<Super><Shift>periodcentered', '<Super><Shift>3']
 move-to-workspace-4=['<Super><Shift>dollar', '<Super><Shift>4']
 push-snap-down=['<Super><Shift>Down']
 push-snap-left=['<Super><Shift>Left']
 push-snap-right=['<Super><Shift>Right']
 push-snap-up=['<Super><Shift>Up']
-push-tile-down=['<Super>Down', '<Super><Control>Down']
-push-tile-left=['<Super>Left', '<Super><Control>Left']
-push-tile-right=['<Super>Right', '<Super><Control>Right']
-push-tile-up=['<Super>Up', '<Super><Control>Up']
+push-tile-down=['<Super><Control>Down']
+push-tile-left=['<Super><Control>Left']
+push-tile-right=['<Super><Control>Right']
+push-tile-up=['<Super><Control>Up']
 switch-input-source=@as []
 switch-input-source-backward=@as []
 switch-to-workspace-1=['<Super>1']
@@ -138,6 +190,9 @@ switch-to-workspace-down=['<Super>w', '<Control><Alt>Down']
 switch-to-workspace-up=['<Super>s', '<Control><Alt>Up', '<Alt>F1']
 switch-windows=['<Alt>Tab']
 toggle-fullscreen=['<Super>f', 'F11']
+
+[desktop/media-handling]
+autorun-never=false
 
 [desktop/peripherals/keyboard]
 numlock-state=false
@@ -160,15 +215,17 @@ theme='Adwaita-dark'
 titlebar-font='Inter Bold 11'
 
 [gestures]
+enabled=true
 swipe-down-2='PUSH_TILE_DOWN::end'
 swipe-down-3='TOGGLE_OVERVIEW::end'
 swipe-down-4='VOLUME_DOWN::end'
 swipe-left-2='PUSH_TILE_LEFT::end'
-swipe-left-3='WORKSPACE_NEXT::end'
-swipe-left-4='WINDOW_WORKSPACE_PREVIOUS::end'
+swipe-left-3='EXEC::xdotool key Alt+Shift+Tab::end'
+swipe-left-4='WORKSPACE_NEXT::end'
+swipe-percent-threshold=uint32 25
 swipe-right-2='PUSH_TILE_RIGHT::end'
-swipe-right-3='WORKSPACE_PREVIOUS::end'
-swipe-right-4='WINDOW_WORKSPACE_NEXT::end'
+swipe-right-3='EXEC::xdotool key Alt+Tab::end'
+swipe-right-4='WORKSPACE_PREVIOUS::end'
 swipe-up-2='PUSH_TILE_UP::end'
 swipe-up-3='TOGGLE_EXPO::end'
 swipe-up-4='VOLUME_UP::end'
@@ -179,12 +236,16 @@ experimental-features=@as []
 placement-mode='automatic'
 unredirect-fullscreen-windows=true
 
+[settings-daemon/peripherals/touchscreen]
+orientation-lock=true
+
 [settings-daemon/plugins/color]
 night-light-last-coordinates=(19.399999999999999, -99.150000000000006)
 
 [settings-daemon/plugins/power]
 button-power='interactive'
 lock-on-suspend=false
+sleep-inactive-battery-timeout=300
 
 [settings-daemon/plugins/xrandr]
 default-monitors-setup='do-nothing'

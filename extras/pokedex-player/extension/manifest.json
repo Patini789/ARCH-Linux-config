@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Gardevoir SoundDex",
+  "version": "1.0.0",
+  "description": "Pokédex Player para YouTube Music: carcasa Gardevoir Shiny y arranque aleatorio.",
+  "host_permissions": ["https://music.youtube.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://music.youtube.com/*"],
+      "css": ["player.css", "app.css"],
+      "js": ["player-template.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/gardevoir-cover.webp"],
+      "matches": ["https://music.youtube.com/*"]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Gardevoir Poké-Calc
+Name[es]=Gardevoir Poké-Calc — Calculadora Glass
+GenericName=Calculadora
+Comment=Calculadora estilo Glassmorphism y Pokémon para Arch Linux
+Exec=/home/patini/.local/bin/gardevoir-calc
+Icon=/home/patini/.local/share/gardevoir-greeter/avatar.png
+Terminal=false
+StartupNotify=true
+StartupWMClass=gardevoir-calc
+Categories=Utility;Calculator;
+Keywords=calculadora;calculator;calc;pokemon;gardevoir;glass;math;

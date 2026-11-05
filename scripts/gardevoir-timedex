@@ -1,0 +1,13 @@
+#!/bin/bash
+# ==============================================================================
+# 🌸 Gardevoir TimeDex Launcher (Single-instance / Instant focus)
+# ==============================================================================
+
+WID=$(xdotool search --onlyvisible --class "GardevoirTimeDex" 2>/dev/null | tail -n 1)
+
+if [ -n "$WID" ] && xdotool windowactivate "$WID" 2>/dev/null; then
+    pw-play --volume=0.35 /home/patini/.local/share/sounds/pokemon/pokeball_blip.wav 2>/dev/null &
+    exit 0
+fi
+
+nohup python3 /home/patini/.local/bin/gardevoir-timedex.py >/dev/null 2>&1 &
