@@ -166,11 +166,17 @@ def update_system_theme(dom_rgb, accent_rgb):
         with open(cheatsheet_rasi, "w") as f:
             f.write(c)
 
-    # 5. OpenRGB (opcional, solo si está instalado en el sistema)
+    # 5. OpenRGB (Hardware RGB: Teclado, Ratón, RAM y Placa, solo si está instalado)
     import shutil
     if shutil.which("openrgb"):
-        subprocess.run(["openrgb", "--device", "1", "--mode", "Direct", "--color", accent_hex[1:]], capture_output=True)
-        subprocess.run(["openrgb", "--device", "0", "--mode", "Static", "--color", accent_hex[1:]], capture_output=True)
+        c_hex = accent_hex[1:]
+        subprocess.run([
+            "openrgb",
+            "--device", "Logitech G213", "--mode", "Direct", "--color", c_hex,
+            "--device", "G502", "--mode", "Static", "--color", c_hex,
+            "--device", "Kingston", "--mode", "Static", "--color", c_hex,
+            "--device", "ASUS", "--mode", "Static", "--color", c_hex
+        ], capture_output=True)
 
     # 6. Gardevoir Poké-Calc theme
     calc_cfg_dir = os.path.join(home, ".config/gardevoir-calc")
