@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Gardevoir CoreDex
+Name[es]=Gardevoir CoreDex — Temperaturas y Cores
+GenericName=Monitor de Hardware y Temperaturas
+Comment=Monitor de CPU, temperaturas, cores y GPU con estética Obsidian Glass
+Exec=/home/patini/.local/bin/gardevoir-coredex
+Icon=/home/patini/.local/share/gardevoir-greeter/avatar.png
+Terminal=false
+StartupNotify=true
+StartupWMClass=gardevoir-coredex
+Categories=System;Monitor;HardwareSettings;
+Keywords=cpu;temperatura;cores;gpu;nvidia;hardware;sensors;monitor;gardevoir;glass;
