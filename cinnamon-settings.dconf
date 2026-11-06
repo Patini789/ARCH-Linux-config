@@ -44,7 +44,7 @@ keyboard-layout-use-upper=true
 text-scaling-factor=1.0
 
 [desktop/keybindings]
-custom-list=['custom0', 'custom1', 'custom2', 'custom3', 'custom4', 'custom5', 'custom6', 'custom7', 'custom8', 'custom9', 'custom10', 'custom11', 'custom12', 'custom13', 'custom14', 'custom15', 'custom16', 'custom17', 'custom18', 'custom19']
+custom-list=['custom0', 'custom1', 'custom2', 'custom3', 'custom4', 'custom5', 'custom6', 'custom7', 'custom8', 'custom9', 'custom10', 'custom11', 'custom12', 'custom13', 'custom14', 'custom15', 'custom16', 'custom17', 'custom18', 'custom19', 'custom20', 'custom21', 'custom22', 'custom23', 'custom24']
 looking-glass-keybinding=@as []
 show-desklets=@as []
 
@@ -105,8 +105,33 @@ name='Gardevoir Poké-Calc (Win + Shift + C)'
 
 [desktop/keybindings/custom-keybindings/custom19]
 binding=['<Super><Shift>t', '<Shift><Super>t']
+command='/home/patini/.local/bin/gardevoir-coredex'
+name='Gardevoir CoreDex (Win + Shift + T)'
+
+[desktop/keybindings/custom-keybindings/custom20]
+binding=['<Super>t']
 command='/home/patini/.local/bin/gardevoir-timedex'
-name='Gardevoir TimeDex (Win + Shift + T)'
+name='Gardevoir TimeDex (Win + T)'
+
+[desktop/keybindings/custom-keybindings/custom21]
+binding=['<Super><Shift>Left', '<Shift><Super>Left']
+command='/home/patini/.local/bin/smart-tile mon-left'
+name='Smart Tile Mover a Monitor Izquierdo (Win + Shift + Left)'
+
+[desktop/keybindings/custom-keybindings/custom22]
+binding=['<Super><Shift>Right', '<Shift><Super>Right']
+command='/home/patini/.local/bin/smart-tile mon-right'
+name='Smart Tile Mover a Monitor Derecho (Win + Shift + Right)'
+
+[desktop/keybindings/custom-keybindings/custom23]
+binding=['<Super><Shift>Up', '<Shift><Super>Up']
+command='/home/patini/.local/bin/smart-tile mon-up'
+name='Smart Tile Mover a Monitor Superior (Win + Shift + Up)'
+
+[desktop/keybindings/custom-keybindings/custom24]
+binding=['<Super><Shift>Down', '<Shift><Super>Down']
+command='/home/patini/.local/bin/smart-tile mon-down'
+name='Smart Tile Mover a Monitor Inferior (Win + Shift + Down)'
 
 [desktop/keybindings/custom-keybindings/custom2]
 binding=['<Super>l']
@@ -172,10 +197,14 @@ move-to-workspace-1=['<Super><Shift>exclam', '<Super><Shift>1']
 move-to-workspace-2=['<Super><Shift>at', '<Super><Shift>quotedbl', '<Super><Shift>2']
 move-to-workspace-3=['<Super><Shift>numbersign', '<Super><Shift>periodcentered', '<Super><Shift>3']
 move-to-workspace-4=['<Super><Shift>dollar', '<Super><Shift>4']
-push-snap-down=['<Super><Shift>Down']
-push-snap-left=['<Super><Shift>Left']
-push-snap-right=['<Super><Shift>Right']
-push-snap-up=['<Super><Shift>Up']
+move-to-monitor-down=@as []
+move-to-monitor-left=@as []
+move-to-monitor-right=@as []
+move-to-monitor-up=@as []
+push-snap-down=@as []
+push-snap-left=@as []
+push-snap-right=@as []
+push-snap-up=@as []
 push-tile-down=['<Super><Control>Down']
 push-tile-left=['<Super><Control>Left']
 push-tile-right=['<Super><Control>Right']

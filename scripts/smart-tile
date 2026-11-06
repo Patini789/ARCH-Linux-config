@@ -607,8 +607,131 @@ def handle_action(direction):
         wm.close()
 
 
+def handle_monitor_move(direction):
+    wm = WindowManager()
+    try:
+        win = wm.get_active_window()
+        if not win or win == wm.root:
+            return
+
+        monitors = []
+        try:
+            out = subprocess.check_output(["xrandr", "--listmonitors"], text=True)
+            for line in out.splitlines()[1:]:
+                parts = line.strip().split()
+                if len(parts) >= 3:
+                    idx = int(parts[0].rstrip(':'))
+                    geom = parts[2]
+                    m = re.match(r'(\d+)(?:/\d+)?x(\d+)(?:/\d+)?\+(\d+)\+(\d+)', geom)
+                    if m:
+                        mw, mh, mx, my = map(int, m.groups())
+                        monitors.append({'index': idx, 'x': mx, 'y': my, 'w': mw, 'h': mh})
+        except Exception:
+            return
+
+        if len(monitors) < 2:
+            return
+
+        cur_x, cur_y, cur_w, cur_h = wm.get_window_geometry(win)
+        fl, fr, ft, fb = wm.get_frame_extents(win)
+        outer_w = cur_w + fl + fr
+        outer_h = cur_h + ft + fb
+        outer_x = cur_x - fl
+        outer_y = cur_y - ft
+
+        cur_cx = cur_x + cur_w // 2
+        cur_cy = cur_y + cur_h // 2
+
+        # Identificar monitor actual
+        cur_mon = None
+        for m in monitors:
+            if m['x'] <= cur_cx < m['x'] + m['w'] and m['y'] <= cur_cy < m['y'] + m['h']:
+                cur_mon = m
+                break
+        if not cur_mon:
+            cur_mon = min(monitors, key=lambda m: (m['x'] + m['w']//2 - cur_cx)**2 + (m['y'] + m['h']//2 - cur_cy)**2)
+
+        # Seleccionar monitor destino según dirección
+        target_mon = None
+        if "left" in direction:
+            left_mons = [m for m in monitors if m['x'] < cur_mon['x']]
+            target_mon = max(left_mons, key=lambda m: m['x']) if left_mons else max(monitors, key=lambda m: m['x'])
+        elif "right" in direction:
+            right_mons = [m for m in monitors if m['x'] > cur_mon['x']]
+            target_mon = min(right_mons, key=lambda m: m['x']) if right_mons else min(monitors, key=lambda m: m['x'])
+        elif "up" in direction:
+            up_mons = [m for m in monitors if m['y'] < cur_mon['y']]
+            target_mon = max(up_mons, key=lambda m: m['y']) if up_mons else max(monitors, key=lambda m: m['y'])
+        elif "down" in direction:
+            down_mons = [m for m in monitors if m['y'] > cur_mon['y']]
+            target_mon = min(down_mons, key=lambda m: m['y']) if down_mons else min(monitors, key=lambda m: m['y'])
+
+        if not target_mon or target_mon['index'] == cur_mon['index']:
+            return
+
+        target_cx = target_mon['x'] + target_mon['w'] // 2
+        target_cy = target_mon['y'] + target_mon['h'] // 2
+        target_wa_x, target_wa_y, target_wa_w, target_wa_h = wm.get_workarea(target_cx, target_cy)
+        cur_wa_x, cur_wa_y, cur_wa_w, cur_wa_h = wm.get_workarea(cur_cx, cur_cy)
+
+        is_max = wm.is_maximized(win)
+        state = load_state()
+        now = time.time()
+        is_same = (state.get("win") == win and (now - state.get("time", 0)) < CYCLE_TIMEOUT)
+
+        if is_same and state.get("slot"):
+            cur_slot = state.get("slot")
+            cur_ratio = state.get("ratio_idx", 0)
+            cur_vmode = state.get("v_mode", "full")
+        else:
+            cur_slot, cur_ratio, cur_vmode = detect_current_state(
+                outer_x, outer_y, outer_w, outer_h, is_max, cur_wa_x, cur_wa_y, cur_wa_w, cur_wa_h
+            )
+
+        if is_max:
+            wm.set_maximized(win, False)
+            time.sleep(0.04)
+            wm.move_resize(win, target_wa_x, target_wa_y, target_wa_w, target_wa_h)
+            time.sleep(0.04)
+            wm.set_maximized(win, True)
+        elif cur_slot in ("left", "center", "right", "top_half", "bottom_half"):
+            tx, ty, tw, th = calc_geometry(target_wa_x, target_wa_y, target_wa_w, target_wa_h, cur_slot, cur_ratio, cur_vmode)
+            wm.move_resize(win, tx, ty, tw, th)
+            save_state({
+                "win": win, "slot": cur_slot, "ratio_idx": cur_ratio,
+                "v_mode": cur_vmode, "min_armed": False, "time": now
+            })
+        else:
+            # Ventana flotante: trasladar posición y escalar proporcionalmente al nuevo monitor
+            rel_x = (outer_x - cur_wa_x) / max(1, cur_wa_w)
+            rel_y = (outer_y - cur_wa_y) / max(1, cur_wa_h)
+            tw = min(target_wa_w, max(250, outer_w))
+            th = min(target_wa_h, max(200, outer_h))
+            tx = target_wa_x + int(rel_x * target_wa_w)
+            ty = target_wa_y + int(rel_y * target_wa_h)
+            tx = max(target_wa_x, min(tx, target_wa_x + target_wa_w - tw))
+            ty = max(target_wa_y, min(ty, target_wa_y + target_wa_h - th))
+            wm.move_resize(win, tx, ty, tw, th)
+
+        # Forzar foco y refresco inmediato de superficie en el nuevo monitor
+        wm.send_client_msg(win, "_NET_ACTIVE_WINDOW", [2, 0, 0, 0, 0])
+        X11.XSync(wm.display, 0)
+    finally:
+        wm.close()
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in ("left", "right", "up", "down"):
-        print(f"Uso: {sys.argv[0]} [left|right|up|down]")
+    if len(sys.argv) < 2:
+        print(f"Uso: {sys.argv[0]} [left|right|up|down|mon-left|mon-right|mon-up|mon-down]")
         sys.exit(1)
-    handle_action(sys.argv[1])
+
+    cmd = sys.argv[1].lower()
+    if cmd in ("left", "right", "up", "down"):
+        handle_action(cmd)
+    elif cmd in ("mon-left", "mon-right", "mon-up", "mon-down",
+                 "monitor-left", "monitor-right", "monitor-up", "monitor-down"):
+        handle_monitor_move(cmd)
+    else:
+        print(f"Comando desconocido: {cmd}")
+        print(f"Uso: {sys.argv[0]} [left|right|up|down|mon-left|mon-right|mon-up|mon-down]")
+        sys.exit(1)
