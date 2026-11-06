@@ -6,10 +6,7 @@ const Main = imports.ui.main;
 const WorkspaceModule = imports.ui.workspace;
 
 let origWorkspaceInit = null;
-let origWorkspaceSelectMonitor = null;
 let origWorkspaceOnKeyPress = null;
-let origWorkspaceMonitorSelectIndex = null;
-let origWorkspaceMonitorOnCloneActivated = null;
 
 function init(metadata) {}
 
@@ -17,7 +14,9 @@ function enable() {
     let Workspace = WorkspaceModule.Workspace;
     let WorkspaceMonitor = WorkspaceModule.WorkspaceMonitor;
 
-    // 1. Hook Workspace.prototype._init: Start Overview on the current active monitor
+    // 1. Hook Workspace.prototype._init:
+    // Abre el Overview directamente en el monitor donde está trabajando el usuario
+    // (en lugar de forzar siempre el monitor primario), y preselecciona la ventana en foco.
     if (!origWorkspaceInit) {
         origWorkspaceInit = Workspace.prototype._init;
     }
@@ -29,7 +28,7 @@ function enable() {
         this._monitors = [];
         this._activeClone = null;
 
-        // Determine current active monitor from pointer or focused window
+        // Determinar el monitor activo desde la ventana con foco o la posición actual
         let targetMon = global.display.get_current_monitor();
         let fw = global.display.focus_window;
         if (fw) {
@@ -47,6 +46,7 @@ function enable() {
             this.actor.add_actor(m.actor);
         });
 
+        // Mantener el monitor del usuario en vez de forzar salto al primario
         this.connect('focus-refresh-required', () => {
             let curMon = this._monitors[this.currentMonitorIndex];
             if (curMon && !curMon.isEmpty()) {
@@ -65,71 +65,9 @@ function enable() {
         });
     };
 
-    // 2. Hook Workspace.prototype.selectMonitor: Warps pointer on monitor selection
-    if (!origWorkspaceSelectMonitor) {
-        origWorkspaceSelectMonitor = Workspace.prototype.selectMonitor;
-    }
-    Workspace.prototype.selectMonitor = function(index) {
-        this.currentMonitorIndex = index;
-        let monActor = this._monitors[this.currentMonitorIndex];
-        if (monActor) {
-            if (monActor.isEmpty()) {
-                try {
-                    let mon = Main.layoutManager.monitors[this.currentMonitorIndex];
-                    if (mon) {
-                        let cx = Math.floor(mon.x + mon.width / 2);
-                        let cy = Math.floor(mon.y + mon.height / 2);
-                        global.set_pointer(cx, cy);
-                    }
-                } catch (e) {}
-            } else {
-                monActor.showActiveSelection();
-            }
-        }
-    };
-
-    // 3. Hook WorkspaceMonitor.prototype.selectIndex: Warps pointer to selected window
-    if (!origWorkspaceMonitorSelectIndex) {
-        origWorkspaceMonitorSelectIndex = WorkspaceMonitor.prototype.selectIndex;
-    }
-    WorkspaceMonitor.prototype.selectIndex = function(index) {
-        this._kbWindowIndex = index;
-        let activeClone = null;
-        if (index > -1 && index < this._windows.length) {
-            activeClone = this._windows[this._kbWindowIndex];
-            if (activeClone && activeClone.metaWindow) {
-                try {
-                    let rect = activeClone.metaWindow.get_frame_rect();
-                    let cx = Math.floor(rect.x + rect.width / 2);
-                    let cy = Math.floor(rect.y + rect.height / 2);
-                    global.set_pointer(cx, cy);
-                } catch (e) {}
-            }
-        }
-        this._myWorkspace.selectActiveClone(activeClone, this);
-    };
-
-    // 4. Hook WorkspaceMonitor.prototype._onCloneActivated: Ensures focus and pointer alignment on activation
-    if (!origWorkspaceMonitorOnCloneActivated) {
-        origWorkspaceMonitorOnCloneActivated = WorkspaceMonitor.prototype._onCloneActivated;
-    }
-    WorkspaceMonitor.prototype._onCloneActivated = function(clone, time) {
-        let wsIndex = undefined;
-        if (this.metaWorkspace)
-            wsIndex = this.metaWorkspace.index();
-
-        if (clone && clone.metaWindow) {
-            try {
-                let rect = clone.metaWindow.get_frame_rect();
-                let cx = Math.floor(rect.x + rect.width / 2);
-                let cy = Math.floor(rect.y + rect.height / 2);
-                global.set_pointer(cx, cy);
-            } catch (e) {}
-        }
-        Main.activateWindow(clone.metaWindow, time, wsIndex);
-    };
-
-    // 5. Hook Workspace.prototype._onKeyPress: Seamless multi-monitor 2D boundary crossing & controls
+    // 2. Hook Workspace.prototype._onKeyPress:
+    // Navegación bidimensional fluida entre monitores con flechas (cruce de bordes),
+    // Down/Up en columna fija y ciclo con Tab / W (SIN mover el cursor del mouse).
     if (!origWorkspaceOnKeyPress) {
         origWorkspaceOnKeyPress = Workspace.prototype._onKeyPress;
     }
@@ -140,7 +78,7 @@ function enable() {
         let ctrlAltMask = Clutter.ModifierType.CONTROL_MASK | Clutter.ModifierType.MOD1_MASK;
         let action = global.display.get_keybinding_action(keycode, modifiers);
 
-        // Sort monitors left-to-right by horizontal X offset
+        // Ordenar monitores de izquierda a derecha según su posición horizontal X
         let monitors = Main.layoutManager.monitors;
         let sortedIndices = monitors.map((m, idx) => ({ idx, x: m.x }))
                                     .sort((a, b) => a.x - b.x)
@@ -148,14 +86,14 @@ function enable() {
         let posInSorted = sortedIndices.indexOf(this.currentMonitorIndex);
         if (posInSorted === -1) posInSorted = 0;
 
-        // Tab / Shift+Tab: cycle non-empty monitors
+        // Tab / Shift+Tab: ciclar entre monitores con ventanas
         if ((symbol === Clutter.KEY_ISO_Left_Tab || symbol === Clutter.KEY_Tab) && !(modifiers & ctrlAltMask)) {
             let increment = symbol === Clutter.KEY_ISO_Left_Tab ? -1 : 1;
             this.selectNextNonEmptyMonitor(this.currentMonitorIndex, increment);
             return true;
         }
 
-        // 'w' or 'W' (without modifiers): cycle monitors
+        // 'w' o 'W' (sin modificadores): ciclar monitores
         if ((symbol === Clutter.KEY_w || symbol === Clutter.KEY_W) &&
             !(modifiers & (Clutter.ModifierType.CONTROL_MASK | Clutter.ModifierType.MOD1_MASK | Clutter.ModifierType.MOD4_MASK))) {
             this.selectNextNonEmptyMonitor(this.currentMonitorIndex, 1);
@@ -164,27 +102,27 @@ function enable() {
 
         let activeMonitor = this._monitors[this.currentMonitorIndex];
 
-        // Alt+M or Alt+Space: Context menu
+        // Alt+M o Alt+Space: menú contextual
         if ((symbol === Clutter.KEY_m || symbol === Clutter.KEY_M || symbol === Clutter.KEY_space) &&
             (modifiers & Clutter.ModifierType.MOD1_MASK) && !(modifiers & Clutter.ModifierType.CONTROL_MASK)) {
             if (activeMonitor) activeMonitor.showMenuForSelectedWindow();
             return true;
         }
 
-        // Close window: Ctrl+W or Meta.KeyBindingAction.CLOSE
+        // Cerrar ventana: Ctrl+W o acción CLOSE
         if (action === Meta.KeyBindingAction.CLOSE ||
             (symbol === Clutter.KEY_w && (modifiers & Clutter.ModifierType.CONTROL_MASK))) {
             if (activeMonitor) activeMonitor.closeSelectedWindow();
             return true;
         }
 
-        // Ctrl+M: Move window to next monitor
+        // Ctrl+M: mover ventana al siguiente monitor
         if ((symbol === Clutter.KEY_m || symbol === Clutter.KEY_M) && (modifiers & Clutter.ModifierType.CONTROL_MASK)) {
             if (activeMonitor) activeMonitor.moveSelectedWindowToNextMonitor();
             return true;
         }
 
-        // Return / Enter / Space: Activate selected window
+        // Return / Enter / Espacio: activar ventana seleccionada
         if (symbol === Clutter.KEY_Return || symbol === Clutter.KEY_KP_Enter || symbol === Clutter.KEY_space) {
             if (activeMonitor && activeMonitor.activateSelectedWindow()) {
                 return true;
@@ -193,7 +131,7 @@ function enable() {
             return true;
         }
 
-        // Escape: Exit overview
+        // Escape: salir de Overview
         if (symbol === Clutter.KEY_Escape) {
             Main.overview.hide();
             return true;
@@ -203,7 +141,7 @@ function enable() {
             return false;
         }
 
-        // Multi-monitor arrow navigation
+        // Navegación con flechas
         let isArrow = (symbol === Clutter.KEY_Right || symbol === Clutter.KEY_Left ||
                        symbol === Clutter.KEY_Down || symbol === Clutter.KEY_Up);
 
@@ -234,7 +172,7 @@ function enable() {
                     activeMonitor.selectIndex(curIdx + 1);
                     return true;
                 } else {
-                    // Cross right to adjacent monitor
+                    // Cruce hacia el monitor adyacente a la derecha
                     let nextIdx = sortedIndices[(posInSorted + 1) % sortedIndices.length];
                     this.selectMonitor(nextIdx);
                     let targetMon = this._monitors[nextIdx];
@@ -250,7 +188,7 @@ function enable() {
                     activeMonitor.selectIndex(curIdx - 1);
                     return true;
                 } else {
-                    // Cross left to adjacent monitor
+                    // Cruce hacia el monitor adyacente a la izquierda
                     let prevIdx = sortedIndices[(posInSorted - 1 + sortedIndices.length) % sortedIndices.length];
                     this.selectMonitor(prevIdx);
                     let targetMon = this._monitors[prevIdx];
@@ -292,26 +230,13 @@ function enable() {
 
 function disable() {
     let Workspace = WorkspaceModule.Workspace;
-    let WorkspaceMonitor = WorkspaceModule.WorkspaceMonitor;
 
     if (origWorkspaceInit) {
         Workspace.prototype._init = origWorkspaceInit;
         origWorkspaceInit = null;
     }
-    if (origWorkspaceSelectMonitor) {
-        Workspace.prototype.selectMonitor = origWorkspaceSelectMonitor;
-        origWorkspaceSelectMonitor = null;
-    }
     if (origWorkspaceOnKeyPress) {
         Workspace.prototype._onKeyPress = origWorkspaceOnKeyPress;
         origWorkspaceOnKeyPress = null;
-    }
-    if (origWorkspaceMonitorSelectIndex) {
-        WorkspaceMonitor.prototype.selectIndex = origWorkspaceMonitorSelectIndex;
-        origWorkspaceMonitorSelectIndex = null;
-    }
-    if (origWorkspaceMonitorOnCloneActivated) {
-        WorkspaceMonitor.prototype._onCloneActivated = origWorkspaceMonitorOnCloneActivated;
-        origWorkspaceMonitorOnCloneActivated = null;
     }
 }
