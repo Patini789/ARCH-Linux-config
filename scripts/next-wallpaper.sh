@@ -1,5 +1,8 @@
 #!/bin/bash
 DIR="${HOME}/Imágenes/Gardevoir/Wallpapers"
+if [ ! -d "$DIR" ] && [ -d "${HOME}/Pictures/Gardevoir/Wallpapers" ]; then
+    DIR="${HOME}/Pictures/Gardevoir/Wallpapers"
+fi
 
 # Soporte para modo silencioso (ideal para timers y cambios automáticos)
 SILENT=false

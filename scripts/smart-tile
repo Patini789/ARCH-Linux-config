@@ -21,6 +21,7 @@ import json
 import time
 import subprocess
 import ctypes
+import ast
 from ctypes import c_int, c_long, c_ulong, c_char_p, c_void_p, Structure, Union, POINTER, byref
 
 # Ratios de ancho al ciclar (50% -> 33.3% -> 66.7%)
@@ -186,31 +187,63 @@ class WindowManager:
     def minimize(self, win):
         self.send_client_msg(win, "WM_CHANGE_STATE", [3, 0, 0, 0, 0])
 
-    def get_workarea(self, win_x=0, win_y=0):
-        wa = self.get_property(self.root, "_NET_WORKAREA")
-        if wa and len(wa) >= 4:
-            gx, gy, gw, gh = wa[0], wa[1], wa[2], wa[3]
-        else:
-            gx, gy, gw, gh = 0, 0, 1920, 1080
-
+    def get_cinnamon_panels(self):
+        panels = []
         try:
+            en_out = subprocess.check_output(['gsettings', 'get', 'org.cinnamon', 'panels-enabled'], text=True).strip()
+            h_out = subprocess.check_output(['gsettings', 'get', 'org.cinnamon', 'panels-height'], text=True).strip()
+            ah_out = subprocess.check_output(['gsettings', 'get', 'org.cinnamon', 'panels-autohide'], text=True).strip()
+
+            enabled = ast.literal_eval(en_out)
+            heights = dict(item.split(':') for item in ast.literal_eval(h_out))
+            autohides = dict(item.split(':') for item in ast.literal_eval(ah_out))
+
+            for p in enabled:
+                pid, mon_idx, edge = p.split(':')
+                is_autohide = autohides.get(pid, 'false').lower() == 'true'
+                if not is_autohide:
+                    h = int(heights.get(pid, 40))
+                    panels.append({'monitor': int(mon_idx), 'edge': edge, 'size': h})
+        except Exception:
+            pass
+        return panels
+
+    def get_workarea(self, win_x=0, win_y=0):
+        try:
+            panels = self.get_cinnamon_panels()
             out = subprocess.check_output(["xrandr", "--listmonitors"], text=True)
             for line in out.splitlines()[1:]:
                 parts = line.strip().split()
                 if len(parts) >= 3:
+                    mon_idx = int(parts[0].rstrip(':'))
                     geom = parts[2]
                     m = re.match(r'(\d+)(?:/\d+)?x(\d+)(?:/\d+)?\+(\d+)\+(\d+)', geom)
                     if m:
                         mw, mh, mx, my = map(int, m.groups())
                         if mx <= win_x < mx + mw and my <= win_y < my + mh:
-                            ix = max(gx, mx)
-                            iy = max(gy, my)
-                            iw = min(gx + gw, mx + mw) - ix
-                            ih = min(gy + gh, my + mh) - iy
-                            return ix, iy, iw, ih
+                            wx, wy, ww, wh = mx, my, mw, mh
+                            for p in panels:
+                                if p['monitor'] == mon_idx:
+                                    edge = p['edge']
+                                    size = p['size']
+                                    if edge == 'top':
+                                        wy += size
+                                        wh -= size
+                                    elif edge == 'bottom':
+                                        wh -= size
+                                    elif edge == 'left':
+                                        wx += size
+                                        ww -= size
+                                    elif edge == 'right':
+                                        ww -= size
+                            return wx, wy, ww, wh
         except Exception:
             pass
-        return gx, gy, gw, gh
+
+        wa = self.get_property(self.root, "_NET_WORKAREA")
+        if wa and len(wa) >= 4:
+            return wa[0], wa[1], wa[2], wa[3]
+        return 0, 0, 1920, 1080
 
     def move_resize(self, win, target_x, target_y, target_w, target_h):
         if self.is_maximized(win):
