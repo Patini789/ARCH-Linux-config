@@ -49,3 +49,10 @@ export PATH="$PATH:$HOME/.lmstudio/bin"
 
 alias cls='clear'
 alias cpwd="pwd | tr -d '\n' | (xclip -selection clipboard 2>/dev/null || wl-copy 2>/dev/null)"
+
+# Auto-source ROS 2 Humble al estar dentro del contenedor
+if [ -f /run/.containerenv ] && [ -f /opt/ros/humble/setup.bash ]; then
+    source /opt/ros/humble/setup.bash
+    export ROS_DOMAIN_ID=0
+    export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+fi

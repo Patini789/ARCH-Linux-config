@@ -3,6 +3,6 @@ Type=Application
 Exec=bash -c 'sleep 2 && pkill -x conky || true; nohup conky -c "$HOME/.config/conky/gardevoir_glass.conf" >/dev/null 2>&1 &'
 Hidden=false
 NoDisplay=false
-X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-enabled=false
 Name=Gardevoir Conky
 Comment=Gardevoir aesthetic glass widget
